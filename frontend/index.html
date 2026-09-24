@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MESA MARKET | Todo empieza con buenos ingredientes</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- =========================
+         CABECERA
+    ========================== -->
+
+    <header class="site-header">
+
+        <div class="header-container">
+
+            <a href="#inicio" class="logo">
+
+                <span class="logo-icon" aria-hidden="true">
+
+                    <svg
+                        viewBox="0 0 64 64"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+
+                        <circle
+                            cx="32"
+                            cy="32"
+                            r="20"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3.5"
+                        />
+
+                        <circle
+                            cx="32"
+                            cy="32"
+                            r="13"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                        />
+
+                        <path
+                            d="M9 12v17"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                        />
+
+                        <path
+                            d="M5 12v8"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        />
+
+                        <path
+                            d="M9 12v8"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        />
+
+                        <path
+                            d="M13 12v8"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        />
+
+                        <path
+                            d="M9 29v23"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                        />
+
+                        <path
+                            d="M52 12v40"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                        />
+
+                        <path
+                            d="M52 12c5 5 6 11 0 17"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                        />
+
+                    </svg>
+
+                </span>
+
+                <span class="logo-text">
+                    MESA
+                </span>
+
+                <span class="logo-market">
+                    MARKET
+                </span>
+
+            </a>
+
+
+            <nav class="main-nav">
+
+                <a href="#inicio">
+                    Inicio
+                </a>
+
+                <a href="#catalog">
+                    Catálogo
+                </a>
+
+                <a href="#recipeFinder">
+                    ¿Qué puedo cocinar?
+                </a>
+
+                <a href="#recipes">
+                    Recetas
+                </a>
+
+                <a href="#about">
+                    Sobre nosotros
+                </a>
+
+            </nav>
+
+
+            <div class="header-actions">
+
+                <button
+                    id="wishlistButton"
+                    class="header-icon"
+                    type="button"
+                    aria-label="Favoritos"
+                >
+                    ♡
+                </button>
+
+
+                <button
+                    id="cartButton"
+                    class="cart-button"
+                    type="button"
+                    aria-label="Abrir cesta"
+                >
+
+                    🛒 Cesta
+
+                    <span id="cartCount">
+                        0
+                    </span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         CONTENIDO
+    ========================== -->
+
+    <main>
+
+
+        <!-- =========================
+             HERO
+        ========================== -->
+
+        <section
+            id="inicio"
+            class="hero"
+        >
+
+            <div class="hero-content">
+
+                <span class="eyebrow">
+                    MESA MARKET
+                </span>
+
+                <h1>
+                    Ingredientes para tu cocina
+                </h1>
+
+                <p>
+                    Seleccionamos productos para que
+                    cocinar sea mucho más sencillo.
+                </p>
+
+                <a
+                    href="#catalog"
+                    class="primary-btn"
+                >
+                    Explorar catálogo
+                </a>
+
+            </div>
+
+
+            <div class="hero-image">
+
+                <img
+                    src="https://images.pexels.com/photos/17477762/pexels-photo-17477762.jpeg?auto=compress&cs=tinysrgb&w=1400"
+                    alt="Ingredientes frescos preparados para cocinar"
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CATEGORÍAS
+        ========================== -->
+
+        <section class="categories-section">
+
+            <div class="section-heading">
+
+                <span class="eyebrow">
+                    CATEGORÍAS
+                </span>
+
+                <h2>
+                    Elige cómo quieres cocinar
+                </h2>
+
+                <p>
+                    Ingredientes seleccionados para
+                    cada tipo de receta.
+                </p>
+
+            </div>
+
+
+            <div
+                id="categoriesContainer"
+                class="categories-grid"
+            ></div>
+
+        </section>
+
+
+        <!-- =========================
+             CATÁLOGO
+        ========================== -->
+
+        <section
+            id="catalog"
+            class="catalog-section"
+        >
+
+            <div class="section-heading">
+
+                <span class="eyebrow">
+                    CATÁLOGO
+                </span>
+
+                <h2>
+                    Buenos ingredientes
+                </h2>
+
+                <p>
+                    Encuentra todo lo que necesitas
+                    para cocinar.
+                </p>
+
+            </div>
+
+
+            <div class="catalog-toolbar">
+
+                <div class="search-box">
+
+                    <input
+                        type="search"
+                        id="searchInput"
+                        placeholder="Buscar ingredientes..."
+                        aria-label="Buscar ingredientes"
+                    >
+
+                </div>
+
+
+                <div class="filters">
+
+                    <select
+                        id="categoryFilter"
+                        aria-label="Filtrar por categoría"
+                    >
+
+                        <option value="all">
+                            Todas las categorías
+                        </option>
+
+                        <option value="1">
+                            Dulce
+                        </option>
+
+                        <option value="2">
+                            Salado
+                        </option>
+
+                    </select>
+
+
+                    <select
+                        id="sortFilter"
+                        aria-label="Ordenar productos"
+                    >
+
+                        <option value="default">
+                            Ordenar
+                        </option>
+
+                        <option value="name">
+                            Nombre
+                        </option>
+
+                        <option value="price-asc">
+                            Precio: menor a mayor
+                        </option>
+
+                        <option value="price-desc">
+                            Precio: mayor a menor
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="catalog-info">
+
+                <span id="productCount">
+                    0 productos
+                </span>
+
+            </div>
+
+
+            <div
+                id="productsContainer"
+                class="products-grid"
+            ></div>
+
+        </section>
+
+
+        <!-- =========================
+             ¿QUÉ PUEDO COCINAR?
+        ========================== -->
+
+        <section
+            id="recipeFinder"
+            class="recipe-finder-section"
+        >
+
+            <div class="section-heading">
+
+                <span class="eyebrow">
+                    INSPIRACIÓN
+                </span>
+
+                <h2>
+                    ¿Qué puedo cocinar?
+                </h2>
+
+                <p>
+                    Selecciona los ingredientes que tienes
+                    y descubre qué recetas puedes preparar.
+                </p>
+
+            </div>
+
+
+            <div class="recipe-finder">
+
+                <div class="recipe-finder-header">
+
+                    <div>
+
+                        <span class="recipe-finder-label">
+                            MIS INGREDIENTES
+                        </span>
+
+                        <h3>
+                            Elige tus productos
+                        </h3>
+
+                        <p>
+                            Selecciona todos los ingredientes
+                            que tengas disponibles.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="ingredient-selector-toolbar">
+
+                    <div class="finder-search">
+
+                        <input
+                            type="search"
+                            id="ingredientSearch"
+                            placeholder="Buscar un ingrediente..."
+                            aria-label="Buscar ingrediente"
+                        >
+
+                    </div>
+
+
+                    <button
+                        id="selectAllIngredients"
+                        class="secondary-btn"
+                        type="button"
+                    >
+                        Seleccionar todos
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="ingredientSelector"
+                    class="ingredient-selector"
+                ></div>
+
+
+                <div
+                    id="selectedIngredients"
+                    class="selected-ingredients"
+                ></div>
+
+
+                <div class="recipe-finder-actions">
+
+                    <button
+                        id="findRecipesButton"
+                        class="primary-btn"
+                        type="button"
+                    >
+                        🔎 Ver recetas disponibles
+                    </button>
+
+
+                    <button
+                        id="clearIngredientsButton"
+                        class="secondary-btn"
+                        type="button"
+                    >
+                        🧹 Limpiar selección
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="recipeFinderResults"
+                    class="recipe-finder-results"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             RECETAS
+        ========================== -->
+
+        <section
+            id="recipes"
+            class="recipes-section"
+        >
+
+            <div class="section-heading">
+
+                <span class="eyebrow">
+                    RECETAS
+                </span>
+
+                <h2>
+                    Ideas para cocinar
+                </h2>
+
+                <p>
+                    Descubre recetas utilizando
+                    nuestros ingredientes.
+                </p>
+
+            </div>
+
+
+            <div
+                id="recipesContainer"
+                class="recipes-grid"
+            ></div>
+
+        </section>
+
+
+        <!-- =========================
+             SOBRE NOSOTROS
+        ========================== -->
+
+        <section
+            id="about"
+            class="about-section"
+        >
+
+            <div class="about-content">
+
+                <span class="eyebrow">
+                    SOBRE MESA
+                </span>
+
+                <h2>
+                    Todo empieza con buenos ingredientes.
+                </h2>
+
+                <p>
+                    En MESA MARKET reunimos ingredientes
+                    de calidad para ayudarte a cocinar de
+                    forma sencilla, descubrir nuevas recetas
+                    y disfrutar más de cada plato.
+                </p>
+
+            </div>
+
+
+            <div class="about-image">
+
+                <img
+                    src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=80"
+                    alt="Ingredientes frescos"
+                >
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer class="site-footer">
+
+        <div class="footer-container">
+
+            <div>
+
+                <strong>
+                    MESA MARKET
+                </strong>
+
+                <p>
+                    Todo empieza con buenos ingredientes.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Ingredientes · Recetas · Inspiración
+                </span>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =========================
+         MODAL PRODUCTO
+    ========================== -->
+
+    <div
+        id="productModal"
+        class="modal oculto"
+    >
+
+        <div class="modal-content">
+
+            <button
+                class="modal-close"
+                type="button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+            <div id="productModalContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         MODAL RECETA
+    ========================== -->
+
+    <div
+        id="recipeModal"
+        class="modal oculto"
+    >
+
+        <div class="modal-content">
+
+            <button
+                class="modal-close"
+                type="button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+            <div id="recipeModalContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         MODAL CESTA
+    ========================== -->
+
+    <div
+        id="cartModal"
+        class="modal oculto"
+    >
+
+        <div class="modal-content">
+
+            <button
+                class="modal-close"
+                type="button"
+                aria-label="Cerrar cesta"
+            >
+                ×
+            </button>
+
+            <h2>
+                Tu cesta
+            </h2>
+
+            <div id="cartModalContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
