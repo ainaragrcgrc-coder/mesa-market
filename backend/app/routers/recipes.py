@@ -313,9 +313,26 @@ def suggest_recipes(
     data: RecipeSuggestionRequest,
     db: Session = Depends(get_db)
 ):
-    recipes = db.query(Recipe).all()
-
     selected_products = set(data.product_ids)
+
+    existing_product_ids = {
+        product.id
+        for product in db.query(Product).filter(
+            Product.id.in_(selected_products)
+        ).all()
+    }
+
+    missing_product_ids = selected_products - existing_product_ids
+
+    if missing_product_ids:
+        missing_id = sorted(missing_product_ids)[0]
+
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"El producto {missing_id} no existe"
+        )
+
+    recipes = db.query(Recipe).all()
 
     suggestions = []
 

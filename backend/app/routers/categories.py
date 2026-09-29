@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Category
+from ..models import Category, Product
 from ..schemas import CategoryCreate, CategoryResponse
 
 
@@ -18,8 +18,15 @@ def get_categories(db: Session = Depends(get_db)):
 
 
 @router.get("/{category_id}", response_model=CategoryResponse)
-def get_category(category_id: int, db: Session = Depends(get_db)):
-    category = db.query(Category).filter(Category.id == category_id).first()
+def get_category(
+    category_id: int,
+    db: Session = Depends(get_db)
+):
+    category = (
+        db.query(Category)
+        .filter(Category.id == category_id)
+        .first()
+    )
 
     if not category:
         raise HTTPException(
@@ -69,7 +76,11 @@ def update_category(
     category_data: CategoryCreate,
     db: Session = Depends(get_db)
 ):
-    category = db.query(Category).filter(Category.id == category_id).first()
+    category = (
+        db.query(Category)
+        .filter(Category.id == category_id)
+        .first()
+    )
 
     if not category:
         raise HTTPException(
@@ -101,17 +112,36 @@ def update_category(
     return category
 
 
-@router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{category_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
 def delete_category(
     category_id: int,
     db: Session = Depends(get_db)
 ):
-    category = db.query(Category).filter(Category.id == category_id).first()
+    category = (
+        db.query(Category)
+        .filter(Category.id == category_id)
+        .first()
+    )
 
     if not category:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Categoría no encontrada"
+        )
+
+    products = (
+        db.query(Product)
+        .filter(Product.category_id == category_id)
+        .first()
+    )
+
+    if products:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="No se puede eliminar la categoría porque tiene productos asociados"
         )
 
     db.delete(category)
