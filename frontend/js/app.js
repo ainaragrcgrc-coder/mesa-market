@@ -1,148 +1,559 @@
+// ============================================================
+// MESA MARKET - APP.JS
+// ============================================================
+
 const API_URL = "http://127.0.0.1:8000/api/v1";
 
 let products = [];
-let recipes = [];
 let categories = [];
-let cart = [];
+let recipes = [];
 
-let selectedIngredientIds = [];
-
-
-// =========================
-// IMÁGENES DE PRODUCTOS
-// =========================
-
-const productImages = {
-    "Aceite de oliva": "assets/products/aceite-oliva.jpg",
-    "Ajo": "assets/products/ajo.jpg",
-    "Arroz": "assets/products/arroz.jpg",
-    "Atún": "assets/products/atun.jpg",
-    "Azúcar glas": "assets/products/azucar-glas.jpg",
-    "Azúcar": "assets/products/azucar.jpg",
-    "Cacao en polvo": "assets/products/cacao-polvo.jpg",
-    "Calabacín": "assets/products/calabacin.jpg",
-    "Cebolla": "assets/products/cebolla.jpg",
-    "Chocolate con leche": "assets/products/chocolate-con-leche.jpg",
-    "Chocolate negro": "assets/products/chocolate-negro.jpg",
-    "Harina de almendra": "assets/products/harina-almendra.jpg",
-    "Harina de trigo": "assets/products/harina-trigo.jpg",
-    "Huevos": "assets/products/huevos.jpg",
-    "Levadura": "assets/products/levadura.jpg",
-    "Mantequilla": "assets/products/mantequilla.jpg",
-    "Nata para montar": "assets/products/nata-montar.jpg",
-    "Pasta": "assets/products/pasta.jpg",
-    "Patata": "assets/products/patata.jpg",
-    "Pechuga de pollo": "assets/products/pechuga-pollo.jpg",
-    "Pimiento rojo": "assets/products/pimiento-rojo.jpg",
-    "Pimiento verde": "assets/products/pimiento-verde.jpg",
-    "Queso": "assets/products/queso.jpg",
-    "Tomate": "assets/products/tomate.jpg",
-    "Vainilla": "assets/products/vainilla.jpg",
-    "Zanahoria": "assets/products/zanahoria.jpg"
-};
-
-
-// =========================
-// IMÁGENES DE RECETAS
-// =========================
-
-const recipeImages = {
-    "Brownie de chocolate": "assets/recipes/brownie-chocolate.jpg",
-    "Tortitas caseras": "assets/recipes/tortitas.jpg",
-    "Bizcocho de vainilla": "assets/recipes/bizcocho-vainilla.jpg",
-    "Galletas de chocolate": "assets/recipes/galletas-chocolate.jpg",
-    "Tomates al horno": "assets/recipes/tomates-horno.jpg",
-    "Pasta con tomate": "assets/recipes/pasta-tomate.jpg",
-    "Arroz con verduras": "assets/recipes/arroz-verduras.jpg",
-    "Ensalada mediterránea": "assets/recipes/ensalada-mediterranea.jpg",
-    "Pollo con verduras": "assets/recipes/pollo-verduras.jpg",
-    "Patatas al horno": "assets/recipes/patatas-horno.jpg"
-};
-
-
-// =========================
-// IMÁGENES DE CATEGORÍAS
-// =========================
-
-const categoryImages = {
-    "Dulce": "assets/recipes/brownie-chocolate.jpg",
-    "Salado": "assets/recipes/pollo-verduras.jpg"
-};
-
-
-// =========================
-// INICIO
-// =========================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        loadData();
-
-        setupButtons();
-
-    }
+let cart = JSON.parse(
+    localStorage.getItem("mesaMarketCart") || "[]"
 );
 
+let selectedIngredientNames = [];
+let editingProductId = null;
 
-// =========================
+
+// ============================================================
+// ELEMENTOS DEL DOM
+// ============================================================
+
+const $ = id => document.getElementById(id);
+
+const categoriesContainer =
+    $("categoriesContainer");
+
+const productsContainer =
+    $("productsContainer");
+
+const recipesContainer =
+    $("recipesContainer");
+
+const searchInput =
+    $("searchInput");
+
+const categoryFilter =
+    $("categoryFilter");
+
+const sortFilter =
+    $("sortFilter");
+
+const productCount =
+    $("productCount");
+
+const ingredientSearch =
+    $("ingredientSearch");
+
+const selectAllIngredients =
+    $("selectAllIngredients");
+
+const ingredientSelector =
+    $("ingredientSelector");
+
+const selectedIngredients =
+    $("selectedIngredients");
+
+const findRecipesButton =
+    $("findRecipesButton");
+
+const clearIngredientsButton =
+    $("clearIngredientsButton");
+
+const recipeFinderResults =
+    $("recipeFinderResults");
+
+const cartButton =
+    $("cartButton");
+
+const cartCount =
+    $("cartCount");
+
+const wishlistButton =
+    $("wishlistButton");
+
+const newProductButton =
+    $("newProductButton");
+
+const productModal =
+    $("productModal");
+
+const productForm =
+    $("productForm");
+
+const cancelProductButton =
+    $("cancelProductButton");
+
+const saveProductButton =
+    $("saveProductButton");
+
+const productFormMessage =
+    $("productFormMessage");
+
+const recipeModal =
+    $("recipeModal");
+
+const recipeModalContent =
+    $("recipeModalContent");
+
+const cartModal =
+    $("cartModal");
+
+const cartModalContent =
+    $("cartModalContent");
+
+
+// ============================================================
+// IMÁGENES DE PRODUCTOS
+// ============================================================
+
+const productImages = {
+
+    "aceite de oliva":
+        "assets/products/aceite-oliva.jpg",
+
+    "ajo":
+        "assets/products/ajo.jpg",
+
+    "arroz":
+        "assets/products/arroz.jpg",
+
+    "atun":
+        "assets/products/atun.jpg",
+
+    "azucar":
+        "assets/products/azucar.jpg",
+
+    "azucar glas":
+        "assets/products/azucar-glas.jpg",
+
+    "cacao en polvo":
+        "assets/products/cacao-polvo.jpg",
+
+    "calabacin":
+        "assets/products/calabacin.jpg",
+
+    "cebolla":
+        "assets/products/cebolla.jpg",
+
+    "chocolate con leche":
+        "assets/products/chocolate-con-leche.jpg",
+
+    "chocolate negro":
+        "assets/products/chocolate-negro.jpg",
+
+    "harina de almendra":
+        "assets/products/harina-almendra.jpg",
+
+    "harina trigo":
+        "assets/products/harina-trigo.jpg",
+
+    "harina de trigo":
+        "assets/products/harina-trigo.jpg",
+
+    "huevos":
+        "assets/products/huevos.jpg",
+
+    "huevo":
+        "assets/products/huevos.jpg",
+
+    "levadura":
+        "assets/products/levadura.jpg",
+
+    "mantequilla":
+        "assets/products/mantequilla.jpg",
+
+    "nata para montar":
+        "assets/products/nata-montar.jpg",
+
+    "nata montar":
+        "assets/products/nata-montar.jpg",
+
+    "pasta":
+        "assets/products/pasta.jpg",
+
+    "patata":
+        "assets/products/patata.jpg",
+
+    "patatas":
+        "assets/products/patata.jpg",
+
+    "pechuga de pollo":
+        "assets/products/pechuga-pollo.jpg",
+
+    "pollo":
+        "assets/products/pechuga-pollo.jpg",
+
+    "pimiento rojo":
+        "assets/products/pimiento-rojo.jpg",
+
+    "pimiento verde":
+        "assets/products/pimiento-verde.jpg",
+
+    "queso":
+        "assets/products/queso.jpg",
+
+    "tomate":
+        "assets/products/tomate.jpg",
+
+    "tomate rama":
+        "assets/products/tomate.jpg",
+
+    "vainilla":
+        "assets/products/vainilla.jpg",
+
+    "zanahoria":
+        "assets/products/zanahoria.jpg"
+};
+
+
+// ============================================================
+// IMÁGENES DE RECETAS
+// ============================================================
+
+const recipeImages = {
+
+    "arroz con verduras":
+        "assets/recipes/arroz-verduras.jpg",
+
+    "bizcocho de vainilla":
+        "assets/recipes/bizcocho-vainilla.jpg",
+
+    "brownie de chocolate":
+        "assets/recipes/brownie-chocolate.jpg",
+
+    "ensalada mediterranea":
+        "assets/recipes/ensalada-mediterranea.jpg",
+
+    "galletas de chocolate":
+        "assets/recipes/galletas-chocolate.jpg",
+
+    "pasta con tomate":
+        "assets/recipes/pasta-tomate.jpg",
+
+    "patatas al horno":
+        "assets/recipes/patatas-horno.jpg",
+
+    "pollo con verduras":
+        "assets/recipes/pollo-verduras.jpg",
+
+    "tomates al horno":
+        "assets/recipes/tomates-horno.jpg",
+
+    "tortitas":
+        "assets/recipes/tortitas.jpg",
+
+    "tortitas caseras":
+        "assets/recipes/tortitas.jpg"
+};
+
+
+// ============================================================
+// IMÁGENES DE CATEGORÍAS
+// ============================================================
+
+const categoryImages = {
+
+    "dulce":
+        "assets/products/chocolate-negro.jpg",
+
+    "salado":
+        "assets/products/tomate.jpg"
+};
+
+
+// ============================================================
+// UTILIDADES
+// ============================================================
+
+function normalizeText(value) {
+
+    return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+
+function escapeHtml(value) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        value ?? "";
+
+    return div.innerHTML;
+}
+
+
+function formatPrice(value) {
+
+    const number =
+        Number(value);
+
+    if (!Number.isFinite(number)) {
+        return "0,00 €";
+    }
+
+    return number
+        .toFixed(2)
+        .replace(".", ",") + " €";
+}
+
+
+function getName(item, fallback) {
+
+    return (
+        item?.name ||
+        item?.title ||
+        item?.nombre ||
+        fallback
+    );
+}
+
+
+function getProductName(product) {
+
+    return getName(
+        product,
+        "Producto"
+    );
+}
+
+
+function getRecipeName(recipe) {
+
+    return getName(
+        recipe,
+        "Receta"
+    );
+}
+
+
+function getImagePath(
+    image,
+    fallback
+) {
+
+    if (!image) {
+        return fallback;
+    }
+
+    if (
+        /^(https?:|data:)/i.test(image)
+    ) {
+        return image;
+    }
+
+    return String(image)
+        .replace(/^\/+/, "");
+}
+
+
+// ============================================================
+// IMAGEN PRODUCTO
+// ============================================================
+
+function getProductImage(product) {
+
+    const key =
+        normalizeText(
+            getProductName(product)
+        );
+
+    return (
+        productImages[key] ||
+        getImagePath(
+            product.image ||
+            product.imagen,
+            "assets/products/aceite-oliva.jpg"
+        )
+    );
+}
+
+
+// ============================================================
+// IMAGEN RECETA
+// ============================================================
+
+function getRecipeImage(recipe) {
+
+    const key =
+        normalizeText(
+            getRecipeName(recipe)
+        );
+
+    return (
+        recipeImages[key] ||
+        getImagePath(
+            recipe.image ||
+            recipe.imagen,
+            "assets/recipes/ensalada-mediterranea.jpg"
+        )
+    );
+}
+
+
+// ============================================================
+// IMAGEN CATEGORÍA
+// ============================================================
+
+function getCategoryImage(category) {
+
+    const key =
+        normalizeText(
+            category?.name ||
+            category?.title ||
+            category?.nombre ||
+            ""
+        );
+
+    return (
+        categoryImages[key] ||
+        getImagePath(
+            category?.image ||
+            category?.imagen,
+            "assets/products/aceite-oliva.jpg"
+        )
+    );
+}
+
+
+// ============================================================
+// MODALES
+// ============================================================
+
+function setModalOpen(modal) {
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.add("active");
+    modal.classList.add("open");
+
+    modal.classList.remove("oculto");
+
+    modal.style.display =
+        "flex";
+
+    document.body.classList.add(
+        "modal-open"
+    );
+}
+
+
+function setModalClosed(modal) {
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove(
+        "active",
+        "open"
+    );
+
+    modal.classList.add(
+        "oculto"
+    );
+
+    modal.style.display =
+        "none";
+
+    const anyOpen =
+        [recipeModal, productModal, cartModal]
+            .some(
+                item =>
+                    item &&
+                    (
+                        item.classList.contains("active") ||
+                        item.classList.contains("open")
+                    )
+            );
+
+    if (!anyOpen) {
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+    }
+}
+
+
+// ============================================================
 // CARGAR DATOS
-// =========================
+// ============================================================
 
 async function loadData() {
 
     try {
 
-        const categoriesResponse =
-            await fetch(
+        console.log(
+            "Cargando datos desde:",
+            API_URL
+        );
+
+        const [
+            categoriesResponse,
+            productsResponse,
+            recipesResponse
+        ] = await Promise.all([
+
+            axios.get(
                 `${API_URL}/categories/`
-            );
+            ),
 
+            axios.get(
+                `${API_URL}/products/`,
+                {
+                    params: {
+                        page: 1,
+                        limit: 100
+                    }
+                }
+            ),
 
-        const productsResponse =
-            await fetch(
-                `${API_URL}/products/?limit=100`
-            );
-
-
-        const recipesResponse =
-            await fetch(
+            axios.get(
                 `${API_URL}/recipes/`
-            );
-
-
-        if (!categoriesResponse.ok) {
-            throw new Error(
-                "Error cargando categorías"
-            );
-        }
-
-
-        if (!productsResponse.ok) {
-            throw new Error(
-                "Error cargando productos"
-            );
-        }
-
-
-        if (!recipesResponse.ok) {
-            throw new Error(
-                "Error cargando recetas"
-            );
-        }
+            )
+        ]);
 
 
         categories =
-            await categoriesResponse.json();
+            Array.isArray(
+                categoriesResponse.data
+            )
+                ? categoriesResponse.data
+                : (
+                    categoriesResponse.data.items ||
+                    []
+                );
 
 
         products =
-            await productsResponse.json();
+            Array.isArray(
+                productsResponse.data
+            )
+                ? productsResponse.data
+                : (
+                    productsResponse.data.items ||
+                    []
+                );
 
 
         recipes =
-            await recipesResponse.json();
+            Array.isArray(
+                recipesResponse.data
+            )
+                ? recipesResponse.data
+                : (
+                    recipesResponse.data.items ||
+                    []
+                );
 
 
         console.log(
@@ -150,12 +561,10 @@ async function loadData() {
             categories
         );
 
-
         console.log(
             "Productos:",
             products
         );
-
 
         console.log(
             "Recetas:",
@@ -165,1880 +574,1020 @@ async function loadData() {
 
         renderCategories();
 
-        renderProducts(products);
+        renderCategoryFilter();
+
+        renderProducts();
 
         renderRecipes();
 
         renderIngredientSelector();
 
+        updateCartCount();
+
 
     } catch (error) {
 
         console.error(
-            "Error cargando los datos:",
+            "Error cargando datos:",
             error
         );
 
+
+        if (productsContainer) {
+
+            productsContainer.innerHTML = `
+                <div class="empty-state">
+                    <p>
+                        No se han podido cargar los productos.
+                    </p>
+                </div>
+            `;
+        }
+
+
+        if (recipesContainer) {
+
+            recipesContainer.innerHTML = `
+                <div class="empty-state">
+                    <p>
+                        No se han podido cargar las recetas.
+                    </p>
+                </div>
+            `;
+        }
     }
 }
 
 
-// =========================
-// CONFIGURAR BOTONES
-// =========================
-
-function setupButtons() {
-
-    const cartButton =
-        document.getElementById(
-            "cartButton"
-        );
-
-
-    if (cartButton) {
-
-        cartButton.addEventListener(
-            "click",
-            function () {
-
-                openCartModal();
-
-            }
-        );
-
-    }
-
-
-    const wishlistButton =
-        document.getElementById(
-            "wishlistButton"
-        );
-
-
-    if (wishlistButton) {
-
-        wishlistButton.addEventListener(
-            "click",
-            function () {
-
-                alert(
-                    "La sección de favoritos estará disponible próximamente."
-                );
-
-            }
-        );
-
-    }
-
-
-    const searchInput =
-        document.getElementById(
-            "searchInput"
-        );
-
-
-    if (searchInput) {
-
-        searchInput.addEventListener(
-            "input",
-            function (event) {
-
-                searchProducts(
-                    event.target.value
-                );
-
-            }
-        );
-
-    }
-
-
-    const categoryFilter =
-        document.getElementById(
-            "categoryFilter"
-        );
-
-
-    if (categoryFilter) {
-
-        categoryFilter.addEventListener(
-            "change",
-            function (event) {
-
-                filterProducts(
-                    event.target.value
-                );
-
-            }
-        );
-
-    }
-
-
-    const sortFilter =
-        document.getElementById(
-            "sortFilter"
-        );
-
-
-    if (sortFilter) {
-
-        sortFilter.addEventListener(
-            "change",
-            function (event) {
-
-                sortProducts(
-                    event.target.value
-                );
-
-            }
-        );
-
-    }
-
-
-    // =========================
-    // BUSCADOR DE INGREDIENTES
-    // =========================
-
-    const ingredientSearch =
-        document.getElementById(
-            "ingredientSearch"
-        );
-
-
-    if (ingredientSearch) {
-
-        ingredientSearch.addEventListener(
-            "input",
-            function (event) {
-
-                renderIngredientSelector(
-                    event.target.value
-                );
-
-            }
-        );
-
-    }
-
-
-    // =========================
-    // BUSCAR RECETAS
-    // =========================
-
-    const findRecipesButton =
-        document.getElementById(
-            "findRecipesButton"
-        );
-
-
-    if (findRecipesButton) {
-
-        findRecipesButton.addEventListener(
-            "click",
-            function () {
-
-                findRecipesByIngredients();
-
-            }
-        );
-
-    }
-
-
-    // =========================
-    // LIMPIAR INGREDIENTES
-    // =========================
-
-    const clearIngredientsButton =
-        document.getElementById(
-            "clearIngredientsButton"
-        );
-
-
-    if (clearIngredientsButton) {
-
-        clearIngredientsButton.addEventListener(
-            "click",
-            function () {
-
-                clearIngredientSelection();
-
-            }
-        );
-
-    }
-
-
-    // =========================
-    // SELECCIONAR TODOS
-    // =========================
-
-    const selectAllButton =
-        document.getElementById(
-            "selectAllIngredients"
-        );
-
-
-    if (selectAllButton) {
-
-        selectAllButton.addEventListener(
-            "click",
-            function () {
-
-                selectAllIngredients();
-
-            }
-        );
-
-    }
-
-}
-
-
-// =========================
+// ============================================================
 // CATEGORÍAS
-// =========================
+// ============================================================
 
 function renderCategories() {
 
-    const container =
-        document.getElementById(
-            "categoriesContainer"
-        );
+    if (!categoriesContainer) {
+        return;
+    }
 
 
-    if (!container) return;
+    categoriesContainer.innerHTML =
+        categories
+            .map(category => {
+
+                const name =
+                    category.name ||
+                    category.title ||
+                    category.nombre ||
+                    "Categoría";
 
 
-    container.innerHTML = "";
+                const image =
+                    getCategoryImage(category);
 
 
-    categories.forEach(
-        function (category) {
+                return `
+                    <article class="category-card">
 
-            const card =
-                document.createElement(
-                    "button"
-                );
+                        <div class="category-image">
 
+                            <img
+                                src="${image}"
+                                alt="${escapeHtml(name)}"
+                                onerror="
+                                    this.style.display='none'
+                                "
+                            >
 
-            card.className =
-                "category-card";
+                        </div>
 
+                        <div class="category-content">
 
-            const image =
-                categoryImages[
-                    category.name
-                ] || "";
+                            <h3>
+                                ${escapeHtml(name)}
+                            </h3>
 
+                        </div>
 
-            card.innerHTML = `
+                    </article>
+                `;
 
-                <div class="category-image">
-
-                    <img
-                        src="${image}"
-                        alt="${category.name}"
-                    >
-
-                </div>
-
-
-                <div class="category-card-content">
-
-                    <h3>
-                        ${category.name}
-                    </h3>
-
-                    <p>
-                        ${category.description ||
-                        "Descubre nuestros ingredientes"}
-                    </p>
-
-                </div>
-
-            `;
-
-
-            card.addEventListener(
-                "click",
-                function () {
-
-                    const filtered =
-                        products.filter(
-                            function (product) {
-
-                                return (
-                                    product.category_id ===
-                                    category.id
-                                );
-
-                            }
-                        );
-
-
-                    renderProducts(
-                        filtered
-                    );
-
-
-                    document
-                        .getElementById(
-                            "catalog"
-                        )
-                        ?.scrollIntoView({
-                            behavior: "smooth"
-                        });
-
-                }
-            );
-
-
-            container.appendChild(card);
-
-        }
-    );
+            })
+            .join("");
 }
 
 
-// =========================
+// ============================================================
+// FILTRO DE CATEGORÍAS
+// ============================================================
+
+function renderCategoryFilter() {
+
+    if (!categoryFilter) {
+        return;
+    }
+
+
+    categoryFilter.innerHTML = `
+        <option value="">
+            Todas las categorías
+        </option>
+    `;
+
+
+    categories.forEach(category => {
+
+        const id =
+            category.id ??
+            category.category_id ??
+            "";
+
+        const name =
+            category.name ||
+            category.title ||
+            category.nombre ||
+            "";
+
+
+        categoryFilter.innerHTML += `
+            <option value="${escapeHtml(String(id))}">
+                ${escapeHtml(name)}
+            </option>
+        `;
+    });
+}
+
+
+// ============================================================
 // PRODUCTOS
-// =========================
+// ============================================================
 
-function renderProducts(
-    productsToRender
-) {
+function renderProducts() {
 
-    const container =
-        document.getElementById(
-            "productsContainer"
+    if (!productsContainer) {
+        return;
+    }
+
+
+    let list =
+        [...products];
+
+
+    const search =
+        normalizeText(
+            searchInput?.value || ""
         );
 
 
-    if (!container) return;
+    const category =
+        categoryFilter?.value || "";
 
 
-    container.innerHTML = "";
+    const sort =
+        sortFilter?.value || "";
 
 
-    const productCount =
-        document.getElementById(
-            "productCount"
+    if (search) {
+
+        list =
+            list.filter(product => {
+
+                const name =
+                    normalizeText(
+                        getProductName(product)
+                    );
+
+                const description =
+                    normalizeText(
+                        product.description ||
+                        product.descripcion ||
+                        ""
+                    );
+
+                return (
+                    name.includes(search) ||
+                    description.includes(search)
+                );
+            });
+    }
+
+
+    if (category) {
+
+        list =
+            list.filter(product => {
+
+                const productCategory =
+                    product.category_id ??
+                    product.category?.id ??
+                    product.category ??
+                    "";
+
+                return (
+                    String(productCategory) ===
+                    String(category)
+                );
+            });
+    }
+
+
+    if (sort === "price-asc") {
+
+        list.sort(
+            (a, b) =>
+                Number(
+                    a.price ??
+                    a.precio ??
+                    0
+                ) -
+                Number(
+                    b.price ??
+                    b.precio ??
+                    0
+                )
         );
+    }
+
+
+    if (sort === "price-desc") {
+
+        list.sort(
+            (a, b) =>
+                Number(
+                    b.price ??
+                    b.precio ??
+                    0
+                ) -
+                Number(
+                    a.price ??
+                    a.precio ??
+                    0
+                )
+        );
+    }
+
+
+    if (sort === "name-asc") {
+
+        list.sort(
+            (a, b) =>
+                getProductName(a)
+                    .localeCompare(
+                        getProductName(b),
+                        "es"
+                    )
+        );
+    }
+
+
+    if (sort === "name-desc") {
+
+        list.sort(
+            (a, b) =>
+                getProductName(b)
+                    .localeCompare(
+                        getProductName(a),
+                        "es"
+                    )
+        );
+    }
 
 
     if (productCount) {
 
         productCount.textContent =
-            `${productsToRender.length} productos`;
-
+            String(list.length);
     }
 
 
-    if (
-        productsToRender.length === 0
-    ) {
+    if (!list.length) {
 
-        container.innerHTML = `
+        productsContainer.innerHTML = `
+            <div class="empty-state">
 
-            <div class="empty-message">
-
-                No hemos encontrado productos.
+                <p>
+                    No hay productos que coincidan.
+                </p>
 
             </div>
-
         `;
 
         return;
     }
 
 
-    productsToRender.forEach(
-        function (product) {
-
-            const card =
-                document.createElement(
-                    "article"
-                );
-
-
-            card.className =
-                "product-card";
-
-
-            const image =
-                productImages[
-                    product.name
-                ] ||
-                product.image ||
-                "";
-
-
-            const category =
-                getCategoryName(
-                    product.category_id
-                );
-
-
-            card.innerHTML = `
-
-                <div class="product-image">
-
-                    <img
-                        src="${image}"
-                        alt="${product.name}"
-                    >
-
-                </div>
-
-
-                <div class="product-card-content">
-
-                    <span class="product-category">
-                        ${category}
-                    </span>
-
-
-                    <h3>
-                        ${product.name}
-                    </h3>
-
-
-                    <p class="product-description">
-
-                        ${
-                            product.description ||
-                            "Producto de calidad para tu cocina."
-                        }
-
-                    </p>
-
-
-                    <div class="product-footer">
-
-                        <strong>
-                            ${Number(
-                                product.price || 0
-                            ).toFixed(2)} €
-                        </strong>
-
-
-                        <button
-                            class="primary-btn add-cart-btn"
-                            type="button"
-                        >
-                            Añadir
-                        </button>
-
-                    </div>
-
-                </div>
-
-            `;
-
-
-            const addButton =
-                card.querySelector(
-                    ".add-cart-btn"
-                );
-
-
-            addButton.addEventListener(
-                "click",
-                function () {
-
-                    addToCart(product);
-
-                }
-            );
-
-
-            container.appendChild(card);
-
-        }
-    );
+    productsContainer.innerHTML =
+        list
+            .map(createProductCard)
+            .join("");
 }
 
 
-// =========================
-// NOMBRE DE CATEGORÍA
-// =========================
+// ============================================================
+// TARJETA PRODUCTO
+// ============================================================
 
-function getCategoryName(
-    categoryId
-) {
+function createProductCard(product) {
 
-    const category =
-        categories.find(
-            function (category) {
+    const id =
+        product.id;
 
-                return (
-                    category.id ===
-                    categoryId
-                );
+    const name =
+        getProductName(product);
 
-            }
-        );
+    const description =
+        product.description ||
+        product.descripcion ||
+        "";
 
+    const price =
+        product.price ??
+        product.precio ??
+        0;
 
-    if (category) {
-
-        return category.name;
-
-    }
-
-
-    return "Alimentación";
-}
+    const unit =
+        product.unit ||
+        product.unidad ||
+        "unidad";
 
 
-// =========================
-// RECETAS
-// =========================
+    return `
+        <article class="product-card">
 
-function renderRecipes() {
+            <div class="product-image">
 
-    const container =
-        document.getElementById(
-            "recipesContainer"
-        );
+                <img
+                    src="${getProductImage(product)}"
+                    alt="${escapeHtml(name)}"
+                    onerror="
+                        this.src='assets/products/aceite-oliva.jpg'
+                    "
+                >
 
-
-    if (!container) return;
-
-
-    container.innerHTML = "";
+            </div>
 
 
-    recipes.forEach(
-        function (recipe) {
+            <div class="product-content">
 
-            const card =
-                document.createElement(
-                    "article"
-                );
+                <h3>
+                    ${escapeHtml(name)}
+                </h3>
 
 
-            card.className =
-                "recipe-card";
+                <p class="product-description">
+                    ${escapeHtml(description)}
+                </p>
 
 
-            const image =
-                recipeImages[
-                    recipe.name
-                ] ||
-                recipe.image ||
-                "";
+                <div class="product-bottom">
 
+                    <strong class="product-price">
+                        ${formatPrice(price)}
+                    </strong>
 
-            card.innerHTML = `
-
-                <div class="recipe-image">
-
-                    <img
-                        src="${image}"
-                        alt="${recipe.name}"
-                    >
+                    <span class="product-unit">
+                        / ${escapeHtml(unit)}
+                    </span>
 
                 </div>
 
 
-                <div class="recipe-card-content">
+                <div class="product-actions">
 
-                    <span class="eyebrow">
-                        RECETA
-                    </span>
-
-
-                    <h3>
-                        ${recipe.name}
-                    </h3>
-
-
-                    <p>
-                        ${recipe.description || ""}
-                    </p>
-
-
-                    <div class="recipe-info">
-
-                        <span>
-                            ⏱️
-                            ${recipe.preparation_time}
-                            min
-                        </span>
-
-
-                        <span>
-                            ⭐
-                            ${recipe.difficulty}
-                        </span>
-
-                    </div>
+                    <button
+                        type="button"
+                        class="primary-btn add-cart-button"
+                        data-id="${id}"
+                    >
+                        Añadir al carrito
+                    </button>
 
 
                     <button
-                        class="primary-btn recipe-button"
                         type="button"
+                        class="edit-product-button"
+                        data-id="${id}"
                     >
-                        Ver receta
+                        Editar
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="delete-product-button"
+                        data-id="${id}"
+                    >
+                        Eliminar
                     </button>
 
                 </div>
 
-            `;
+            </div>
 
-
-            const button =
-                card.querySelector(
-                    ".recipe-button"
-                );
-
-
-            button.addEventListener(
-                "click",
-                function () {
-
-                    openRecipeModal(
-                        recipe
-                    );
-
-                }
-            );
-
-
-            container.appendChild(card);
-
-        }
-    );
+        </article>
+    `;
 }
 
 
-// =========================
-// MODAL RECETA
-// =========================
+// ============================================================
+// RECETAS
+// ============================================================
 
-function openRecipeModal(
-    recipe
-) {
+function renderRecipes() {
 
-    const modal =
-        document.getElementById(
-            "recipeModal"
-        );
+    if (!recipesContainer) {
+        return;
+    }
 
 
-    const content =
-        document.getElementById(
-            "recipeModalContent"
-        );
+    if (!recipes.length) {
 
-
-    if (!modal || !content) {
-
-        console.error(
-            "No se encuentra el modal de receta"
-        );
+        recipesContainer.innerHTML = `
+            <div class="empty-state">
+                <p>
+                    No hay recetas disponibles.
+                </p>
+            </div>
+        `;
 
         return;
     }
 
 
-    const ingredients =
-        recipe.ingredients || [];
+    recipesContainer.innerHTML =
+        recipes
+            .map(createRecipeCard)
+            .join("");
+}
 
 
-    const steps =
-        recipe.instructions
-            ? recipe.instructions
-                .split(".")
-                .map(
-                    function (step) {
+// ============================================================
+// TARJETA RECETA
+// ============================================================
 
-                        return step.trim();
+function createRecipeCard(recipe) {
 
-                    }
-                )
-                .filter(Boolean)
-            : [];
+    const name =
+        getRecipeName(recipe);
 
-
-    const image =
-        recipeImages[
-            recipe.name
-        ] ||
-        recipe.image ||
+    const description =
+        recipe.description ||
+        recipe.descripcion ||
         "";
 
 
-    content.innerHTML = `
+    return `
+        <article class="recipe-card">
 
-        <article class="recipe-detail">
-
-
-            <div
-                class="recipe-detail-image-wrapper"
-            >
+            <div class="recipe-image">
 
                 <img
-                    src="${image}"
-                    alt="${recipe.name}"
-                    class="recipe-detail-image"
+                    src="${getRecipeImage(recipe)}"
+                    alt="${escapeHtml(name)}"
+                    onerror="
+                        this.src='assets/recipes/ensalada-mediterranea.jpg'
+                    "
                 >
-
-
-                <div class="recipe-detail-badge">
-                    MESA MARKET
-                </div>
 
             </div>
 
 
-            <div class="recipe-detail-info">
+            <div class="recipe-content">
 
+                <h3>
+                    ${escapeHtml(name)}
+                </h3>
 
-                <span class="recipe-detail-label">
-                    RECETA
-                </span>
-
-
-                <h2>
-                    ${recipe.name}
-                </h2>
-
-
-                <p class="recipe-detail-description">
-                    ${recipe.description || ""}
+                <p>
+                    ${escapeHtml(description)}
                 </p>
 
 
-                <div class="recipe-detail-meta">
-
-
-                    <div class="recipe-meta-item">
-
-                        <span class="recipe-meta-icon">
-                            ⏱️
-                        </span>
-
-
-                        <div>
-
-                            <small>
-                                TIEMPO
-                            </small>
-
-
-                            <strong>
-                                ${recipe.preparation_time}
-                                min
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="recipe-meta-item">
-
-                        <span class="recipe-meta-icon">
-                            ⭐
-                        </span>
-
-
-                        <div>
-
-                            <small>
-                                DIFICULTAD
-                            </small>
-
-
-                            <strong>
-                                ${recipe.difficulty}
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- INGREDIENTES -->
-
-                <section
-                    class="recipe-detail-section"
+                <button
+                    type="button"
+                    class="primary-btn view-recipe-button"
+                    data-id="${recipe.id}"
                 >
-
-                    <div
-                        class="recipe-section-title"
-                    >
-
-                        <span>
-                            🥕
-                        </span>
-
-
-                        <div>
-
-                            <small>
-                                PARA PREPARAR
-                            </small>
-
-
-                            <h3>
-                                Ingredientes
-                            </h3>
-
-                        </div>
-
-                    </div>
-
-
-                    <ul class="ingredients-list">
-
-                        ${
-                            ingredients.length
-
-                            ? ingredients
-                                .map(
-                                    function (
-                                        ingredient
-                                    ) {
-
-                                        return `
-
-                                            <li>
-
-                                                <span
-                                                    class="ingredient-check"
-                                                >
-                                                    ✓
-                                                </span>
-
-
-                                                <span>
-
-                                                    <strong>
-                                                        ${ingredient.name}
-                                                    </strong>
-
-
-                                                    <small>
-                                                        ${ingredient.quantity}
-                                                    </small>
-
-                                                </span>
-
-                                            </li>
-
-                                        `;
-
-                                    }
-                                )
-                                .join("")
-
-                            : `
-
-                                <li>
-                                    No hay ingredientes
-                                    disponibles.
-                                </li>
-
-                            `
-                        }
-
-                    </ul>
-
-                </section>
-
-
-                <!-- PREPARACIÓN -->
-
-                <section
-                    class="recipe-detail-section"
-                >
-
-                    <div
-                        class="recipe-section-title"
-                    >
-
-                        <span>
-                            👩‍🍳
-                        </span>
-
-
-                        <div>
-
-                            <small>
-                                PASO A PASO
-                            </small>
-
-
-                            <h3>
-                                Preparación
-                            </h3>
-
-                        </div>
-
-                    </div>
-
-
-                    <ol class="steps-list">
-
-                        ${
-                            steps.length
-
-                            ? steps
-                                .map(
-                                    function (
-                                        step,
-                                        index
-                                    ) {
-
-                                        return `
-
-                                            <li>
-
-                                                <span
-                                                    class="step-number"
-                                                >
-                                                    ${index + 1}
-                                                </span>
-
-
-                                                <div
-                                                    class="step-text"
-                                                >
-                                                    ${step}.
-                                                </div>
-
-                                            </li>
-
-                                        `;
-
-                                    }
-                                )
-                                .join("")
-
-                            : `
-
-                                <li>
-                                    No hay instrucciones
-                                    disponibles.
-                                </li>
-
-                            `
-                        }
-
-                    </ol>
-
-                </section>
-
-
-                <div
-                    class="recipe-detail-footer"
-                >
-
-                    <span>
-                        🍴
-                        Disfruta de tu receta
-                    </span>
-
-
-                    <span>
-                        MESA MARKET
-                    </span>
-
-                </div>
-
+                    Ver receta
+                </button>
 
             </div>
 
         </article>
-
     `;
-
-
-    modal.classList.add(
-        "active"
-    );
 }
 
 
-// =====================================================
-// SELECTOR DE INGREDIENTES
-// =====================================================
+// ============================================================
+// INGREDIENTES
+// ============================================================
 
-function renderIngredientSelector(
-    searchText = ""
-) {
+function getRecipeIngredients(recipe) {
 
-    const container =
-        document.getElementById(
-            "ingredientSelector"
-        );
+    const value =
+        recipe.ingredients ||
+        recipe.ingredientes ||
+        [];
 
 
-    if (!container) return;
+    if (Array.isArray(value)) {
+
+        return value
+            .map(item => {
+
+                if (
+                    typeof item ===
+                    "string"
+                ) {
+                    return item;
+                }
+
+                return (
+                    item.name ||
+                    item.nombre ||
+                    item.ingredient ||
+                    ""
+                );
+            })
+            .filter(Boolean);
+    }
+
+
+    if (typeof value === "string") {
+
+        return value
+            .split(",")
+            .map(item => item.trim())
+            .filter(Boolean);
+    }
+
+
+    return [];
+}
+
+
+// ============================================================
+// SELECTOR INGREDIENTES
+// ============================================================
+
+function renderIngredientSelector() {
+
+    if (!ingredientSelector) {
+        return;
+    }
+
+
+    const map =
+        new Map();
+
+
+    recipes.forEach(recipe => {
+
+        getRecipeIngredients(recipe)
+            .forEach(ingredient => {
+
+                const key =
+                    normalizeText(ingredient);
+
+
+                if (
+                    key &&
+                    !map.has(key)
+                ) {
+
+                    map.set(
+                        key,
+                        ingredient
+                    );
+                }
+            });
+    });
 
 
     const search =
-        searchText
-            .toLowerCase()
-            .trim();
-
-
-    const filteredProducts =
-        products.filter(
-            function (product) {
-
-                return product.name
-                    .toLowerCase()
-                    .includes(search);
-
-            }
+        normalizeText(
+            ingredientSearch?.value ||
+            ""
         );
 
 
-    container.innerHTML = "";
-
-
-    if (
-        filteredProducts.length === 0
-    ) {
-
-        container.innerHTML = `
-
-            <div class="empty-message">
-                No hemos encontrado ese ingrediente.
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    filteredProducts.forEach(
-        function (product) {
-
-            const isSelected =
-                selectedIngredientIds.includes(
-                    product.id
-                );
-
-
-            const item =
-                document.createElement(
-                    "label"
-                );
-
-
-            item.className =
-                "ingredient-option";
-
-
-            if (isSelected) {
-
-                item.classList.add(
-                    "selected"
-                );
-
-            }
-
-
-            const image =
-                productImages[
-                    product.name
-                ] ||
-                product.image ||
-                "";
-
-
-            item.innerHTML = `
-
-                <input
-                    type="checkbox"
-                    value="${product.id}"
-                    ${isSelected ? "checked" : ""}
-                >
-
-
-                <div class="ingredient-option-image">
-
-                    <img
-                        src="${image}"
-                        alt="${product.name}"
-                    >
-
-                </div>
-
-
-                <div class="ingredient-option-info">
-
-                    <strong>
-                        ${product.name}
-                    </strong>
-
-
-                    <span>
-                        ${getCategoryName(
-                            product.category_id
-                        )}
-                    </span>
-
-                </div>
-
-
-                <span class="ingredient-option-check">
-                    ✓
-                </span>
-
-            `;
-
-
-            const checkbox =
-                item.querySelector(
-                    "input"
-                );
-
-
-            checkbox.addEventListener(
-                "change",
-                function () {
-
-                    toggleIngredient(
-                        product.id
-                    );
-
-                }
+    const ingredients =
+        [...map.values()]
+            .filter(
+                ingredient =>
+                    normalizeText(
+                        ingredient
+                    ).includes(search)
+            )
+            .sort(
+                (a, b) =>
+                    normalizeText(a)
+                        .localeCompare(
+                            normalizeText(b),
+                            "es"
+                        )
             );
 
 
-            container.appendChild(
-                item
-            );
+    ingredientSelector.innerHTML =
+        ingredients
+            .map(ingredient => {
 
-        }
-    );
-
-
-    renderSelectedIngredients();
-}
-
-
-// =========================
-// SELECCIONAR / DESELECCIONAR
-// =========================
-
-function toggleIngredient(
-    productId
-) {
-
-    if (
-        selectedIngredientIds.includes(
-            productId
-        )
-    ) {
-
-        selectedIngredientIds =
-            selectedIngredientIds.filter(
-                function (id) {
-
-                    return id !== productId;
-
-                }
-            );
-
-    } else {
-
-        selectedIngredientIds.push(
-            productId
-        );
-
-    }
-
-
-    const searchInput =
-        document.getElementById(
-            "ingredientSearch"
-        );
-
-
-    renderIngredientSelector(
-        searchInput
-            ? searchInput.value
-            : ""
-    );
-}
-
-
-// =========================
-// INGREDIENTES SELECCIONADOS
-// =========================
-
-function renderSelectedIngredients() {
-
-    const container =
-        document.getElementById(
-            "selectedIngredients"
-        );
-
-
-    if (!container) return;
-
-
-    if (
-        selectedIngredientIds.length === 0
-    ) {
-
-        container.innerHTML = `
-
-            <span class="selected-empty">
-                Todavía no has seleccionado ingredientes.
-            </span>
-
-        `;
-
-        return;
-    }
-
-
-    const selectedProducts =
-        products.filter(
-            function (product) {
-
-                return selectedIngredientIds.includes(
-                    product.id
-                );
-
-            }
-        );
-
-
-    container.innerHTML = `
-
-        <div class="selected-title">
-            Ingredientes seleccionados:
-        </div>
-
-
-        <div class="selected-tags">
-
-            ${
-                selectedProducts
-                    .map(
-                        function (product) {
-
-                            return `
-
-                                <button
-                                    type="button"
-                                    class="selected-tag"
-                                    data-id="${product.id}"
-                                >
-
-                                    ${product.name}
-
-                                    <span>
-                                        ×
-                                    </span>
-
-                                </button>
-
-                            `;
-
-                        }
-                    )
-                    .join("")
-            }
-
-        </div>
-
-    `;
-
-
-    container
-        .querySelectorAll(
-            ".selected-tag"
-        )
-        .forEach(
-            function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        toggleIngredient(
-                            Number(
-                                button.dataset.id
-                            )
+                const checked =
+                    selectedIngredientNames
+                        .some(
+                            item =>
+                                normalizeText(item) ===
+                                normalizeText(ingredient)
                         );
 
-                    }
-                );
 
-            }
-        );
+                const image =
+                    productImages[
+                        normalizeText(ingredient)
+                    ] ||
+                    "assets/products/aceite-oliva.jpg";
+
+
+                return `
+                    <label class="ingredient-option">
+
+                        <input
+                            type="checkbox"
+                            value="${escapeHtml(ingredient)}"
+                            ${checked ? "checked" : ""}
+                        >
+
+                        <img
+                            src="${image}"
+                            alt="${escapeHtml(ingredient)}"
+                            onerror="
+                                this.src='assets/products/aceite-oliva.jpg'
+                            "
+                        >
+
+                        <span>
+                            ${escapeHtml(ingredient)}
+                        </span>
+
+                    </label>
+                `;
+
+            })
+            .join("");
+
+
+    updateSelectedIngredients();
 }
 
 
-// =====================================================
-// BUSCAR RECETAS SEGÚN INGREDIENTES
-// =====================================================
+// ============================================================
+// INGREDIENTES SELECCIONADOS
+// ============================================================
+
+function updateSelectedIngredients() {
+
+    if (!selectedIngredients) {
+        return;
+    }
+
+
+    if (!selectedIngredientNames.length) {
+
+        selectedIngredients.innerHTML = `
+            <span class="no-selection">
+                Ningún ingrediente seleccionado
+            </span>
+        `;
+
+        return;
+    }
+
+
+    selectedIngredients.innerHTML =
+        selectedIngredientNames
+            .map(
+                ingredient => `
+                    <span class="selected-ingredient">
+                        ${escapeHtml(ingredient)}
+                    </span>
+                `
+            )
+            .join("");
+}
+
+
+// ============================================================
+// BUSCAR RECETAS
+// ============================================================
 
 function findRecipesByIngredients() {
 
-    const results =
-        document.getElementById(
-            "recipeFinderResults"
-        );
+    if (!recipeFinderResults) {
+        return;
+    }
 
 
-    if (!results) return;
+    if (!selectedIngredientNames.length) {
 
-
-    if (
-        selectedIngredientIds.length === 0
-    ) {
-
-        results.innerHTML = `
-
-            <div class="finder-message">
-
-                <span>
-                    🥕
-                </span>
-
-                <h3>
-                    Selecciona algunos ingredientes
-                </h3>
+        recipeFinderResults.innerHTML = `
+            <div class="empty-state">
 
                 <p>
-                    Elige los productos que tienes
-                    disponibles para buscar recetas.
+                    Selecciona al menos un ingrediente.
                 </p>
 
             </div>
-
         `;
 
         return;
     }
 
 
-    const selectedIds =
-        new Set(
-            selectedIngredientIds
-        );
+    const selected =
+        selectedIngredientNames
+            .map(normalizeText);
 
 
-    const exactRecipes = [];
+    const matches =
+        recipes.filter(recipe => {
+
+            const ingredients =
+                getRecipeIngredients(recipe)
+                    .map(normalizeText);
 
 
-    const possibleRecipes = [];
-
-
-    recipes.forEach(
-        function (recipe) {
-
-            const recipeIngredients =
-                recipe.ingredients || [];
-
-
-            const recipeIds =
-                recipeIngredients.map(
-                    function (ingredient) {
-
-                        return ingredient.product_id;
-
-                    }
-                );
-
-
-            if (
-                recipeIds.length === 0
-            ) {
-
-                return;
-
-            }
-
-
-            const missing =
-                recipeIds.filter(
-                    function (id) {
-
-                        return !selectedIds.has(
-                            id
-                        );
-
-                    }
-                );
-
-
-            if (
-                missing.length === 0
-            ) {
-
-                exactRecipes.push(
-                    recipe
-                );
-
-            } else {
-
-                possibleRecipes.push({
-                    recipe: recipe,
-                    missing: missing
-                });
-
-            }
-
-        }
-    );
-
-
-    /*
-     * Ordenamos las recetas incompletas
-     * colocando primero las que necesitan
-     * menos ingredientes adicionales.
-     */
-
-    possibleRecipes.sort(
-        function (a, b) {
-
-            return (
-                a.missing.length -
-                b.missing.length
-            );
-
-        }
-    );
-
-
-    results.innerHTML = `
-
-        <div class="finder-results-header">
-
-            <span class="eyebrow">
-                RESULTADOS
-            </span>
-
-
-            <h3>
-                Recetas que puedes preparar
-            </h3>
-
-        </div>
-
-    `;
-
-
-    // =========================
-    // RECETAS COMPLETAS
-    // =========================
-
-    if (
-        exactRecipes.length > 0
-    ) {
-
-        const completeTitle =
-            document.createElement(
-                "div"
-            );
-
-
-        completeTitle.className =
-            "finder-subtitle";
-
-
-        completeTitle.innerHTML = `
-            <span>✓</span>
-            Puedes hacer estas recetas
-        `;
-
-
-        results.appendChild(
-            completeTitle
-        );
-
-
-        exactRecipes.forEach(
-            function (recipe) {
-
-                results.appendChild(
-                    createFinderRecipeCard(
-                        recipe
+            return selected.every(
+                selectedIngredient =>
+                    ingredients.some(
+                        ingredient =>
+                            ingredient.includes(
+                                selectedIngredient
+                            )
                     )
-                );
-
-            }
-        );
-
-    } else {
-
-        const noExact =
-            document.createElement(
-                "div"
             );
+        });
 
 
-        noExact.className =
-            "finder-message finder-message-small";
-
-
-        noExact.innerHTML = `
-
-            <span>
-                👩‍🍳
-            </span>
-
-            <div>
-
-                <strong>
-                    Todavía no tienes todos los ingredientes
-                </strong>
-
-                <p>
-                    Mira las recetas que puedes completar
-                    añadiendo algún ingrediente más.
-                </p>
-
-            </div>
-
-        `;
-
-
-        results.appendChild(
-            noExact
-        );
-
-    }
-
-
-    // =========================
-    // RECETAS CASI COMPLETAS
-    // =========================
-
-    const nearRecipes =
-        possibleRecipes.slice(
-            0,
-            6
-        );
-
-
-    if (
-        nearRecipes.length > 0
-    ) {
-
-        const nearTitle =
-            document.createElement(
-                "div"
-            );
-
-
-        nearTitle.className =
-            "finder-subtitle";
-
-
-        nearTitle.innerHTML = `
-            <span>＋</span>
-            Te falta algún ingrediente
-        `;
-
-
-        results.appendChild(
-            nearTitle
-        );
-
-
-        nearRecipes.forEach(
-            function (item) {
-
-                results.appendChild(
-                    createFinderRecipeCard(
-                        item.recipe,
-                        item.missing
-                    )
-                );
-
-            }
-        );
-
-    }
-
+    recipeFinderResults.innerHTML =
+        matches.length
+            ? matches
+                .map(createFinderRecipeCard)
+                .join("")
+            : `
+                <div class="empty-state">
+                    <p>
+                        Aún no encontramos recetas con esos ingredientes.
+                    </p>
+                </div>
+            `;
 }
 
 
-// =====================================================
-// CREAR TARJETA DE RESULTADO
-// =====================================================
+// ============================================================
+// TARJETA RESULTADO RECETA
+// ============================================================
 
-function createFinderRecipeCard(
-    recipe,
-    missingIds = []
-) {
+function createFinderRecipeCard(recipe) {
 
-    const card =
-        document.createElement(
-            "article"
-        );
+    const name =
+        getRecipeName(recipe);
 
 
-    card.className =
-        "finder-recipe-card";
+    return `
+        <article class="finder-recipe-card">
+
+            <div class="finder-recipe-image">
+
+                <img
+                    src="${getRecipeImage(recipe)}"
+                    alt="${escapeHtml(name)}"
+                    onerror="
+                        this.src='assets/recipes/ensalada-mediterranea.jpg'
+                    "
+                >
+
+            </div>
 
 
-    const image =
-        recipeImages[
-            recipe.name
-        ] ||
-        recipe.image ||
+            <div class="finder-recipe-content">
+
+                <h3>
+                    ${escapeHtml(name)}
+                </h3>
+
+
+                <button
+                    type="button"
+                    class="primary-btn view-recipe-button"
+                    data-id="${recipe.id}"
+                >
+                    Ver receta
+                </button>
+
+            </div>
+
+        </article>
+    `;
+}
+
+
+// ============================================================
+// MODAL RECETA
+// ============================================================
+
+function openRecipeModal(recipeOrId) {
+
+    if (
+        !recipeModal ||
+        !recipeModalContent
+    ) {
+        return;
+    }
+
+
+    const recipe =
+        typeof recipeOrId === "object"
+            ? recipeOrId
+            : recipes.find(
+                item =>
+                    String(item.id) ===
+                    String(recipeOrId)
+            );
+
+
+    if (!recipe) {
+        return;
+    }
+
+
+    const name =
+        getRecipeName(recipe);
+
+    const description =
+        recipe.description ||
+        recipe.descripcion ||
         "";
 
+    const instructions =
+        recipe.instructions ||
+        recipe.instrucciones ||
+        recipe.steps ||
+        recipe.pasos ||
+        "";
 
-    const missingProducts =
-        products.filter(
-            function (product) {
-
-                return missingIds.includes(
-                    product.id
-                );
-
-            }
-        );
+    const ingredients =
+        getRecipeIngredients(recipe);
 
 
-    let missingHTML = "";
+    recipeModalContent.innerHTML = `
 
-
-    if (
-        missingProducts.length > 0
-    ) {
-
-        missingHTML = `
-
-            <div class="finder-missing">
-
-                <strong>
-                    Te falta:
-                </strong>
-
-
-                <span>
-                    ${
-                        missingProducts
-                            .map(
-                                function (product) {
-
-                                    return product.name;
-
-                                }
-                            )
-                            .join(", ")
-                    }
-                </span>
-
-            </div>
-
-        `;
-
-    } else {
-
-        missingHTML = `
-
-            <div class="finder-ready">
-
-                ✓ Tienes todos los ingredientes
-
-            </div>
-
-        `;
-
-    }
-
-
-    card.innerHTML = `
-
-        <div class="finder-recipe-image">
+        <div class="recipe-detail">
 
             <img
-                src="${image}"
-                alt="${recipe.name}"
+                class="recipe-detail-image"
+                src="${getRecipeImage(recipe)}"
+                alt="${escapeHtml(name)}"
+                onerror="
+                    this.src='assets/recipes/ensalada-mediterranea.jpg'
+                "
             >
 
+
+            <h2>
+                ${escapeHtml(name)}
+            </h2>
+
+
+            ${
+                description
+                    ? `
+                        <p>
+                            ${escapeHtml(description)}
+                        </p>
+                    `
+                    : ""
+            }
+
+
+            ${
+                ingredients.length
+                    ? `
+                        <h3>
+                            Ingredientes
+                        </h3>
+
+                        <ul>
+                            ${
+                                ingredients
+                                    .map(
+                                        item =>
+                                            `<li>
+                                                ${escapeHtml(item)}
+                                            </li>`
+                                    )
+                                    .join("")
+                            }
+                        </ul>
+                    `
+                    : ""
+            }
+
+
+            ${
+                instructions
+                    ? `
+                        <h3>
+                            Preparación
+                        </h3>
+
+                        <p>
+                            ${escapeHtml(instructions)}
+                        </p>
+                    `
+                    : ""
+            }
+
         </div>
-
-
-        <div class="finder-recipe-content">
-
-            <span class="eyebrow">
-                RECETA
-            </span>
-
-
-            <h3>
-                ${recipe.name}
-            </h3>
-
-
-            <p>
-                ${recipe.description || ""}
-            </p>
-
-
-            <div class="recipe-info">
-
-                <span>
-                    ⏱️
-                    ${recipe.preparation_time}
-                    min
-                </span>
-
-
-                <span>
-                    ⭐
-                    ${recipe.difficulty}
-                </span>
-
-            </div>
-
-
-            ${missingHTML}
-
-
-            <button
-                class="primary-btn finder-view-recipe"
-                type="button"
-            >
-                Ver receta
-            </button>
-
-        </div>
-
     `;
 
 
-    const button =
-        card.querySelector(
-            ".finder-view-recipe"
-        );
-
-
-    button.addEventListener(
-        "click",
-        function () {
-
-            openRecipeModal(
-                recipe
-            );
-
-        }
-    );
-
-
-    return card;
+    setModalOpen(recipeModal);
 }
 
 
-// =========================
-// SELECCIONAR TODOS
-// =========================
+function closeRecipeModal() {
 
-function selectAllIngredients() {
-
-    selectedIngredientIds =
-        products.map(
-            function (product) {
-
-                return product.id;
-
-            }
-        );
-
-
-    const searchInput =
-        document.getElementById(
-            "ingredientSearch"
-        );
-
-
-    renderIngredientSelector(
-        searchInput
-            ? searchInput.value
-            : ""
+    setModalClosed(
+        recipeModal
     );
-
 }
 
 
-// =========================
-// LIMPIAR SELECCIÓN
-// =========================
+// ============================================================
+// CARRITO
+// ============================================================
 
-function clearIngredientSelection() {
+function saveCart() {
 
-    selectedIngredientIds = [];
-
-
-    const searchInput =
-        document.getElementById(
-            "ingredientSearch"
-        );
+    localStorage.setItem(
+        "mesaMarketCart",
+        JSON.stringify(cart)
+    );
+}
 
 
-    if (searchInput) {
+function updateCartCount() {
 
-        searchInput.value = "";
-
+    if (!cartCount) {
+        return;
     }
 
 
-    renderIngredientSelector();
-
-
-    const results =
-        document.getElementById(
-            "recipeFinderResults"
+    const count =
+        cart.reduce(
+            (total, item) =>
+                total +
+                Number(
+                    item.quantity || 1
+                ),
+            0
         );
 
 
-    if (results) {
-
-        results.innerHTML = "";
-
-    }
-
+    cartCount.textContent =
+        String(count);
 }
 
 
-// =========================
-// CESTA
-// =========================
+function addToCart(productId) {
 
-function addToCart(
-    product
-) {
+    const product =
+        products.find(
+            item =>
+                String(item.id) ===
+                String(productId)
+        );
+
+
+    if (!product) {
+        return;
+    }
+
 
     const existing =
         cart.find(
-            function (item) {
-
-                return (
-                    item.id ===
-                    product.id
-                );
-
-            }
+            item =>
+                String(item.id) ===
+                String(productId)
         );
 
 
     if (existing) {
 
-        existing.quantity += 1;
+        existing.quantity =
+            Number(
+                existing.quantity || 1
+            ) + 1;
 
     } else {
 
@@ -2046,524 +1595,68 @@ function addToCart(
             ...product,
             quantity: 1
         });
-
     }
 
+
+    saveCart();
+
+    updateCartCount();
+}
+
+
+function removeFromCart(productId) {
+
+    cart =
+        cart.filter(
+            item =>
+                String(item.id) !==
+                String(productId)
+        );
+
+
+    saveCart();
 
     updateCartCount();
 
-
-    alert(
-        product.name +
-        " añadido a la cesta"
-    );
-}
-
-
-// =========================
-// CONTADOR CESTA
-// =========================
-
-function updateCartCount() {
-
-    const counter =
-        document.getElementById(
-            "cartCount"
-        );
-
-
-    if (!counter) return;
-
-
-    const total =
-        cart.reduce(
-            function (
-                sum,
-                item
-            ) {
-
-                return (
-                    sum +
-                    item.quantity
-                );
-
-            },
-            0
-        );
-
-
-    counter.textContent =
-        total;
-}
-
-
-// =========================
-// ABRIR CESTA
-// =========================
-
-function openCartModal() {
-
-    const modal =
-        document.getElementById(
-            "cartModal"
-        );
-
-
-    const content =
-        document.getElementById(
-            "cartModalContent"
-        );
-
-
-    if (!modal || !content) {
-
-        console.error(
-            "No se encuentra cartModal o cartModalContent"
-        );
-
-        return;
-    }
-
-
     renderCart();
-
-
-    modal.classList.add(
-        "active"
-    );
 }
 
 
-// =========================
-// MOSTRAR CESTA
-// =========================
-
-function renderCart() {
-
-    const content =
-        document.getElementById(
-            "cartModalContent"
-        );
-
-
-    if (!content) return;
-
-
-    if (
-        cart.length === 0
-    ) {
-
-        content.innerHTML = `
-
-            <div class="empty-cart">
-
-                <div class="empty-cart-icon">
-                    🛒
-                </div>
-
-
-                <span class="empty-cart-label">
-                    MESA MARKET
-                </span>
-
-
-                <h3>
-                    Tu cesta está vacía
-                </h3>
-
-
-                <p>
-                    Añade tus ingredientes favoritos
-                    para comenzar tu compra.
-                </p>
-
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    const total =
-        cart.reduce(
-            function (
-                sum,
-                item
-            ) {
-
-                return (
-                    sum +
-                    Number(
-                        item.price || 0
-                    ) *
-                    item.quantity
-                );
-
-            },
-            0
-        );
-
-
-    content.innerHTML = `
-
-        <div class="cart-header">
-
-            <div>
-
-                <span class="cart-label">
-                    MESA MARKET
-                </span>
-
-
-                <h2>
-                    Tu cesta
-                </h2>
-
-
-                <p>
-
-                    ${cart.length}
-
-                    ${
-                        cart.length === 1
-                            ? "producto"
-                            : "productos"
-                    }
-
-                </p>
-
-            </div>
-
-
-            <div class="cart-header-icon">
-                🛒
-            </div>
-
-        </div>
-
-
-        <div class="cart-items">
-
-            ${
-                cart
-                    .map(
-                        function (
-                            item
-                        ) {
-
-                            const image =
-                                productImages[
-                                    item.name
-                                ] ||
-                                item.image ||
-                                "";
-
-
-                            const itemTotal =
-                                Number(
-                                    item.price || 0
-                                ) *
-                                item.quantity;
-
-
-                            return `
-
-                                <div
-                                    class="cart-item"
-                                >
-
-                                    <img
-                                        src="${image}"
-                                        alt="${item.name}"
-                                    >
-
-
-                                    <div
-                                        class="cart-item-info"
-                                    >
-
-                                        <span
-                                            class="cart-item-category"
-                                        >
-                                            ${getCategoryName(
-                                                item.category_id
-                                            )}
-                                        </span>
-
-
-                                        <h3>
-                                            ${item.name}
-                                        </h3>
-
-
-                                        <p>
-                                            ${Number(
-                                                item.price || 0
-                                            ).toFixed(2)}
-                                            € / unidad
-                                        </p>
-
-                                    </div>
-
-
-                                    <div
-                                        class="cart-item-controls"
-                                    >
-
-                                        <button
-                                            class="quantity-button decrease"
-                                            data-id="${item.id}"
-                                            type="button"
-                                        >
-                                            −
-                                        </button>
-
-
-                                        <span
-                                            class="quantity-value"
-                                        >
-                                            ${item.quantity}
-                                        </span>
-
-
-                                        <button
-                                            class="quantity-button increase"
-                                            data-id="${item.id}"
-                                            type="button"
-                                        >
-                                            +
-                                        </button>
-
-                                    </div>
-
-
-                                    <div
-                                        class="cart-item-total"
-                                    >
-
-                                        <strong>
-                                            ${itemTotal.toFixed(2)}
-                                            €
-                                        </strong>
-
-
-                                        <button
-                                            class="remove-cart-button"
-                                            data-id="${item.id}"
-                                            type="button"
-                                        >
-                                            ×
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                            `;
-
-                        }
-                    )
-                    .join("")
-            }
-
-        </div>
-
-
-        <div class="cart-summary">
-
-            <div class="cart-summary-line">
-
-                <span>
-                    Subtotal
-                </span>
-
-
-                <span>
-                    ${total.toFixed(2)} €
-                </span>
-
-            </div>
-
-
-            <div class="cart-summary-line">
-
-                <span>
-                    Envío
-                </span>
-
-
-                <span class="free-shipping">
-                    Gratis
-                </span>
-
-            </div>
-
-
-            <div class="cart-summary-total">
-
-                <span>
-                    Total
-                </span>
-
-
-                <strong>
-                    ${total.toFixed(2)} €
-                </strong>
-
-            </div>
-
-        </div>
-
-
-        <button
-            class="checkout-button"
-            type="button"
-        >
-            Finalizar compra
-        </button>
-
-    `;
-
-
-    content
-        .querySelectorAll(
-            ".increase"
-        )
-        .forEach(
-            function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        changeQuantity(
-                            Number(
-                                button.dataset.id
-                            ),
-                            1
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    content
-        .querySelectorAll(
-            ".decrease"
-        )
-        .forEach(
-            function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        changeQuantity(
-                            Number(
-                                button.dataset.id
-                            ),
-                            -1
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    content
-        .querySelectorAll(
-            ".remove-cart-button"
-        )
-        .forEach(
-            function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        removeFromCart(
-                            Number(
-                                button.dataset.id
-                            )
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    const checkoutButton =
-        content.querySelector(
-            ".checkout-button"
-        );
-
-
-    if (checkoutButton) {
-
-        checkoutButton.addEventListener(
-            "click",
-            function () {
-
-                alert(
-                    "La función de compra estará disponible próximamente."
-                );
-
-            }
-        );
-
-    }
-
-}
-
-
-// =========================
-// CAMBIAR CANTIDAD
-// =========================
-
-function changeQuantity(
+function changeCartQuantity(
     productId,
-    amount
+    delta
 ) {
 
     const item =
         cart.find(
-            function (item) {
-
-                return (
-                    item.id ===
-                    productId
-                );
-
-            }
+            product =>
+                String(product.id) ===
+                String(productId)
         );
 
 
-    if (!item) return;
+    if (!item) {
+        return;
+    }
 
 
-    item.quantity += amount;
+    item.quantity =
+        Number(
+            item.quantity || 1
+        ) + delta;
 
 
-    if (
-        item.quantity <= 0
-    ) {
+    if (item.quantity <= 0) {
 
         removeFromCart(
             productId
         );
 
         return;
-
     }
 
+
+    saveCart();
 
     updateCartCount();
 
@@ -2571,280 +1664,1123 @@ function changeQuantity(
 }
 
 
-// =========================
-// ELIMINAR DEL CARRITO
-// =========================
+function renderCart() {
 
-function removeFromCart(
+    if (!cartModalContent) {
+        return;
+    }
+
+
+    if (!cart.length) {
+
+        cartModalContent.innerHTML = `
+
+            <div class="empty-state">
+
+                <h3>
+                    Tu cesta está vacía
+                </h3>
+
+                <p>
+                    Añade productos para empezar.
+                </p>
+
+            </div>
+        `;
+
+        return;
+    }
+
+
+    let total = 0;
+
+
+    const items =
+        cart
+            .map(item => {
+
+                const price =
+                    Number(
+                        item.price ??
+                        item.precio ??
+                        0
+                    );
+
+                const quantity =
+                    Number(
+                        item.quantity || 1
+                    );
+
+
+                total +=
+                    price * quantity;
+
+
+                return `
+                    <div class="cart-item">
+
+                        <img
+                            src="${getProductImage(item)}"
+                            alt="${escapeHtml(
+                                getProductName(item)
+                            )}"
+                        >
+
+                        <div class="cart-item-info">
+
+                            <h3>
+                                ${escapeHtml(
+                                    getProductName(item)
+                                )}
+                            </h3>
+
+                            <strong>
+                                ${formatPrice(price)}
+                            </strong>
+
+
+                            <div class="cart-quantity">
+
+                                <button
+                                    type="button"
+                                    data-cart-minus="${item.id}"
+                                >
+                                    −
+                                </button>
+
+                                <span>
+                                    ${quantity}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    data-cart-plus="${item.id}"
+                                >
+                                    +
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="cart-remove-button"
+                            data-cart-remove="${item.id}"
+                        >
+                            Eliminar
+                        </button>
+
+                    </div>
+                `;
+
+            })
+            .join("");
+
+
+    cartModalContent.innerHTML = `
+
+        <div class="cart-list">
+
+            ${items}
+
+        </div>
+
+
+        <div class="cart-total">
+
+            <strong>
+                Total
+            </strong>
+
+            <strong>
+                ${formatPrice(total)}
+            </strong>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="primary-btn cart-checkout-btn"
+            id="checkoutButton"
+        >
+            Finalizar compra
+        </button>
+    `;
+}
+
+
+// ============================================================
+// MODAL PRODUCTO
+// ============================================================
+
+function field(id) {
+
+    return $(id);
+}
+
+
+function openProductModal(
+    product = null
+) {
+
+    if (
+        !productModal ||
+        !productForm
+    ) {
+        return;
+    }
+
+
+    editingProductId =
+        product?.id ?? null;
+
+
+    productForm.reset();
+
+
+    if (product) {
+
+        if (field("productName")) {
+
+            field(
+                "productName"
+            ).value =
+                getProductName(product);
+        }
+
+
+        if (field("productDescription")) {
+
+            field(
+                "productDescription"
+            ).value =
+                product.description ||
+                product.descripcion ||
+                "";
+        }
+
+
+        if (field("productPrice")) {
+
+            field(
+                "productPrice"
+            ).value =
+                product.price ??
+                product.precio ??
+                "";
+        }
+
+
+        if (field("productStock")) {
+
+            field(
+                "productStock"
+            ).value =
+                product.stock ??
+                "";
+        }
+
+
+        if (field("productUnit")) {
+
+            field(
+                "productUnit"
+            ).value =
+                product.unit ||
+                product.unidad ||
+                "";
+        }
+
+
+        if (field("productCategory")) {
+
+            field(
+                "productCategory"
+            ).value =
+                product.category_id ??
+                product.category?.id ??
+                product.category ??
+                "";
+        }
+
+
+        if (field("productImage")) {
+
+            field(
+                "productImage"
+            ).value =
+                product.image ||
+                product.imagen ||
+                "";
+        }
+    }
+
+
+    if (productFormMessage) {
+
+        productFormMessage.textContent =
+            "";
+    }
+
+
+    setModalOpen(
+        productModal
+    );
+}
+
+
+function closeProductModal() {
+
+    setModalClosed(
+        productModal
+    );
+
+    editingProductId =
+        null;
+}
+
+
+// ============================================================
+// GUARDAR PRODUCTO
+// ============================================================
+
+async function saveProduct(event) {
+
+    event.preventDefault();
+
+
+    const name =
+        field(
+            "productName"
+        )?.value.trim() ||
+        "";
+
+
+    const description =
+        field(
+            "productDescription"
+        )?.value.trim() ||
+        "";
+
+
+    const price =
+        Number(
+            field(
+                "productPrice"
+            )?.value || 0
+        );
+
+
+    const stock =
+        Number(
+            field(
+                "productStock"
+            )?.value || 0
+        );
+
+
+    const unit =
+        field(
+            "productUnit"
+        )?.value.trim() ||
+        "unidad";
+
+
+    const category =
+        field(
+            "productCategory"
+        )?.value ||
+        "";
+
+
+    const image =
+        field(
+            "productImage"
+        )?.value.trim() ||
+        null;
+
+
+    if (!name) {
+
+        if (productFormMessage) {
+
+            productFormMessage.textContent =
+                "El nombre es obligatorio.";
+        }
+
+        return;
+    }
+
+
+    const data = {
+
+        name,
+
+        description,
+
+        price,
+
+        stock,
+
+        unit,
+
+        category_id:
+            category
+                ? Number(category)
+                : null,
+
+        image
+    };
+
+
+    try {
+
+        if (editingProductId) {
+
+            await axios.put(
+                `${API_URL}/products/${editingProductId}`,
+                data
+            );
+
+        } else {
+
+            await axios.post(
+                `${API_URL}/products/`,
+                data
+            );
+        }
+
+
+        closeProductModal();
+
+        await loadData();
+
+
+    } catch (error) {
+
+        console.error(
+            "Error guardando producto:",
+            error
+        );
+
+
+        if (productFormMessage) {
+
+            productFormMessage.textContent =
+                error.response?.data?.detail ||
+                "No se ha podido guardar el producto.";
+        }
+    }
+}
+
+
+// ============================================================
+// ELIMINAR PRODUCTO
+// ============================================================
+
+async function deleteProduct(
     productId
 ) {
 
-    cart =
-        cart.filter(
-            function (item) {
-
-                return (
-                    item.id !==
-                    productId
-                );
-
-            }
+    const product =
+        products.find(
+            item =>
+                String(item.id) ===
+                String(productId)
         );
 
 
-    updateCartCount();
+    if (!product) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            `¿Quieres eliminar "${getProductName(
+                product
+            )}"?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        await axios.delete(
+            `${API_URL}/products/${productId}`
+        );
+
+
+        await loadData();
+
+
+    } catch (error) {
+
+        console.error(
+            "Error eliminando producto:",
+            error
+        );
+
+
+        alert(
+            "No se ha podido eliminar el producto."
+        );
+    }
+}
+
+
+// ============================================================
+// MODAL CARRITO
+// ============================================================
+
+function openCartModal() {
 
     renderCart();
+
+    setModalOpen(
+        cartModal
+    );
 }
 
 
-// =========================
-// BUSCAR PRODUCTOS
-// =========================
+function closeCartModal() {
 
-function searchProducts(
-    text
-) {
-
-    const search =
-        text
-            .toLowerCase()
-            .trim();
+    setModalClosed(
+        cartModal
+    );
+}
 
 
-    if (!search) {
+// ============================================================
+// CAPA VISUAL DE SEGURIDAD
+// ============================================================
 
-        renderProducts(
-            products
-        );
+function injectUiFixes() {
 
+    if (
+        document.getElementById(
+            "mesaMarketUiFixes"
+        )
+    ) {
         return;
-
     }
 
 
-    const filtered =
-        products.filter(
-            function (product) {
-
-                return product.name
-                    .toLowerCase()
-                    .includes(search);
-
-            }
+    const style =
+        document.createElement(
+            "style"
         );
 
 
-    renderProducts(
-        filtered
+    style.id =
+        "mesaMarketUiFixes";
+
+
+    style.textContent = `
+
+        .category-image {
+            overflow: hidden;
+            border-radius: 18px;
+        }
+
+        .category-image img {
+            width: 100%;
+            height: 100%;
+            min-height: 170px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .product-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .product-actions button {
+            border: 0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font: 600 14px/1.2 system-ui, sans-serif;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+
+        .product-actions
+        .add-cart-button {
+            grid-column: 1 / -1;
+            background: #144228;
+            color: #ffffff;
+        }
+
+        .product-actions
+        .edit-product-button {
+            background: #eef3ef;
+            color: #144228;
+            border: 1px solid #cbd7ce;
+        }
+
+        .product-actions
+        .delete-product-button {
+            background: #fff1ed;
+            color: #8e3410;
+            border: 1px solid #edc8bb;
+        }
+
+        .product-actions button:hover {
+            transform: translateY(-1px);
+        }
+
+        .view-recipe-button {
+            margin-top: 14px;
+            border: 0;
+            border-radius: 12px;
+            padding: 12px 18px;
+            background: #144228;
+            color: #ffffff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .recipe-detail-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 18px;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 24px;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        .modal.oculto {
+            display: none !important;
+        }
+
+        .modal.active,
+        .modal.open,
+        .modal-overlay.active,
+        .modal-overlay.open {
+            display: flex !important;
+        }
+
+        @media (max-width: 600px) {
+
+            .product-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .product-actions
+            .add-cart-button {
+                grid-column: auto;
+            }
+        }
+    `;
+
+
+    document.head.appendChild(
+        style
     );
 }
 
 
-// =========================
-// FILTRAR PRODUCTOS
-// =========================
+// ============================================================
+// EVENTOS
+// ============================================================
 
-function filterProducts(
-    value
-) {
-
-    if (
-        !value ||
-        value === "all"
-    ) {
-
-        renderProducts(
-            products
-        );
-
-        return;
-
-    }
+searchInput?.addEventListener(
+    "input",
+    renderProducts
+);
 
 
-    const filtered =
-        products.filter(
-            function (product) {
-
-                return (
-                    product.category_id ===
-                    Number(value)
-                );
-
-            }
-        );
+categoryFilter?.addEventListener(
+    "change",
+    renderProducts
+);
 
 
-    renderProducts(
-        filtered
-    );
-}
+sortFilter?.addEventListener(
+    "change",
+    renderProducts
+);
 
 
-// =========================
-// ORDENAR PRODUCTOS
-// =========================
-
-function sortProducts(
-    value
-) {
-
-    const sorted =
-        [...products];
+ingredientSearch?.addEventListener(
+    "input",
+    renderIngredientSelector
+);
 
 
-    if (
-        value === "name"
-    ) {
+ingredientSelector?.addEventListener(
+    "change",
+    event => {
 
-        sorted.sort(
-            function (
-                a,
-                b
+        if (
+            event.target.type !==
+            "checkbox"
+        ) {
+            return;
+        }
+
+
+        const value =
+            event.target.value;
+
+
+        if (
+            event.target.checked
+        ) {
+
+            if (
+                !selectedIngredientNames.some(
+                    item =>
+                        normalizeText(item) ===
+                        normalizeText(value)
+                )
             ) {
 
-                return a.name.localeCompare(
-                    b.name,
-                    "es"
+                selectedIngredientNames.push(
+                    value
                 );
-
             }
+
+        } else {
+
+            selectedIngredientNames =
+                selectedIngredientNames.filter(
+                    item =>
+                        normalizeText(item) !==
+                        normalizeText(value)
+                );
+        }
+
+
+        updateSelectedIngredients();
+    }
+);
+
+
+selectAllIngredients?.addEventListener(
+    "change",
+    event => {
+
+        const boxes =
+            ingredientSelector
+                ?.querySelectorAll(
+                    'input[type="checkbox"]'
+                ) || [];
+
+
+        boxes.forEach(
+            box =>
+                box.checked =
+                    event.target.checked
         );
 
+
+        selectedIngredientNames =
+            event.target.checked
+                ? [...boxes].map(
+                    box =>
+                        box.value
+                )
+                : [];
+
+
+        updateSelectedIngredients();
     }
+);
 
 
-    if (
-        value === "price-asc"
-    ) {
+findRecipesButton?.addEventListener(
+    "click",
+    findRecipesByIngredients
+);
 
-        sorted.sort(
-            function (
-                a,
-                b
-            ) {
 
-                return (
-                    Number(
-                        a.price || 0
-                    ) -
-                    Number(
-                        b.price || 0
-                    )
+clearIngredientsButton?.addEventListener(
+    "click",
+    () => {
+
+        selectedIngredientNames =
+            [];
+
+
+        if (ingredientSearch) {
+
+            ingredientSearch.value =
+                "";
+        }
+
+
+        if (selectAllIngredients) {
+
+            selectAllIngredients.checked =
+                false;
+        }
+
+
+        renderIngredientSelector();
+
+
+        if (recipeFinderResults) {
+
+            recipeFinderResults.innerHTML =
+                "";
+        }
+    }
+);
+
+
+cartButton?.addEventListener(
+    "click",
+    openCartModal
+);
+
+
+wishlistButton?.addEventListener(
+    "click",
+    () => {
+
+        alert(
+            "La función de favoritos estará disponible próximamente."
+        );
+    }
+);
+
+
+newProductButton?.addEventListener(
+    "click",
+    () => {
+
+        openProductModal();
+    }
+);
+
+
+cancelProductButton?.addEventListener(
+    "click",
+    closeProductModal
+);
+
+
+productForm?.addEventListener(
+    "submit",
+    saveProduct
+);
+
+
+// ============================================================
+// BOTONES DINÁMICOS DE PRODUCTOS
+// ============================================================
+
+productsContainer?.addEventListener(
+    "click",
+    event => {
+
+        const add =
+            event.target.closest(
+                ".add-cart-button"
+            );
+
+
+        if (add) {
+
+            addToCart(
+                add.dataset.id
+            );
+
+            return;
+        }
+
+
+        const edit =
+            event.target.closest(
+                ".edit-product-button"
+            );
+
+
+        if (edit) {
+
+            const product =
+                products.find(
+                    item =>
+                        String(item.id) ===
+                        String(
+                            edit.dataset.id
+                        )
                 );
 
-            }
-        );
 
-    }
+            if (product) {
 
-
-    if (
-        value === "price-desc"
-    ) {
-
-        sorted.sort(
-            function (
-                a,
-                b
-            ) {
-
-                return (
-                    Number(
-                        b.price || 0
-                    ) -
-                    Number(
-                        a.price || 0
-                    )
+                openProductModal(
+                    product
                 );
-
             }
-        );
 
+            return;
+        }
+
+
+        const remove =
+            event.target.closest(
+                ".delete-product-button"
+            );
+
+
+        if (remove) {
+
+            deleteProduct(
+                remove.dataset.id
+            );
+        }
     }
+);
 
 
-    renderProducts(
-        sorted
-    );
-}
+// ============================================================
+// BOTONES DINÁMICOS DE RECETAS
+// ============================================================
+
+recipesContainer?.addEventListener(
+    "click",
+    event => {
+
+        const button =
+            event.target.closest(
+                ".view-recipe-button"
+            );
 
 
-// =========================
+        if (button) {
+
+            openRecipeModal(
+                button.dataset.id
+            );
+        }
+    }
+);
+
+
+recipeFinderResults?.addEventListener(
+    "click",
+    event => {
+
+        const button =
+            event.target.closest(
+                ".view-recipe-button"
+            );
+
+
+        if (button) {
+
+            openRecipeModal(
+                button.dataset.id
+            );
+        }
+    }
+);
+
+
+// ============================================================
+// BOTONES DEL CARRITO
+// ============================================================
+
+cartModalContent?.addEventListener(
+    "click",
+    event => {
+
+        const remove =
+            event.target.closest(
+                "[data-cart-remove]"
+            );
+
+
+        if (remove) {
+
+            removeFromCart(
+                remove.dataset.cartRemove
+            );
+
+            return;
+        }
+
+
+        const plus =
+            event.target.closest(
+                "[data-cart-plus]"
+            );
+
+
+        if (plus) {
+
+            changeCartQuantity(
+                plus.dataset.cartPlus,
+                1
+            );
+
+            return;
+        }
+
+
+        const minus =
+            event.target.closest(
+                "[data-cart-minus]"
+            );
+
+
+        if (minus) {
+
+            changeCartQuantity(
+                minus.dataset.cartMinus,
+                -1
+            );
+
+            return;
+        }
+
+
+        const checkout =
+            event.target.closest(
+                "#checkoutButton"
+            );
+
+
+        if (checkout) {
+
+            alert(
+                "La función de compra estará disponible próximamente."
+            );
+        }
+    }
+);
+
+
+// ============================================================
 // CERRAR MODALES
-// =========================
+// ============================================================
 
 document.addEventListener(
     "click",
-    function (event) {
+    event => {
 
-        if (
-            event.target.classList.contains(
-                "modal-close"
-            )
-        ) {
+        const closeButton =
+            event.target.closest(
+                ".modal-close, .close-modal, [data-close-modal]"
+            );
+
+
+        if (closeButton) {
 
             const modal =
-                event.target.closest(
-                    ".modal"
+                closeButton.closest(
+                    ".modal, .modal-overlay"
                 );
 
 
             if (modal) {
 
-                modal.classList.remove(
-                    "active"
+                setModalClosed(
+                    modal
                 );
-
             }
 
+            return;
         }
 
 
         if (
-            event.target.classList.contains(
-                "modal"
+            event.target.matches(
+                ".modal, .modal-overlay"
             )
         ) {
 
-            event.target.classList.remove(
-                "active"
+            setModalClosed(
+                event.target
             );
-
         }
-
     }
 );
 
 
-// =========================
-// ESC PARA CERRAR
-// =========================
+// ============================================================
+// CERRAR CON ESC
+// ============================================================
 
 document.addEventListener(
     "keydown",
-    function (event) {
+    event => {
 
         if (
-            event.key === "Escape"
+            event.key ===
+            "Escape"
         ) {
 
-            document
-                .querySelectorAll(
-                    ".modal.active"
-                )
-                .forEach(
-                    function (modal) {
+            closeRecipeModal();
 
-                        modal.classList.remove(
-                            "active"
-                        );
+            closeProductModal();
 
-                    }
-                );
-
+            closeCartModal();
         }
-
     }
 );
+
+
+// ============================================================
+// INICIO
+// ============================================================
+
+async function init() {
+
+    console.log(
+        "MESA MARKET iniciando..."
+    );
+
+
+    injectUiFixes();
+
+
+    updateCartCount();
+
+
+    await loadData();
+
+
+    console.log(
+        "MESA MARKET cargado correctamente."
+    );
+}
+
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        init
+    );
+
+} else {
+
+    init();
+}

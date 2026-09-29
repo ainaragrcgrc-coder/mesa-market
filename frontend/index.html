@@ -8,6 +8,148 @@
     <title>MESA MARKET | Todo empieza con buenos ingredientes</title>
 
     <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* =========================
+           GESTIÓN DE PRODUCTOS
+        ========================== */
+
+        .catalog-admin {
+            display: flex;
+            justify-content: flex-end;
+            margin: 0 0 24px;
+        }
+
+        .product-admin-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .product-admin-actions button {
+            border: none;
+            cursor: pointer;
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .edit-product-btn {
+            background: #eee8df;
+            color: #3d352d;
+        }
+
+        .delete-product-btn {
+            background: #f5dddd;
+            color: #8b2e2e;
+        }
+
+        .edit-product-btn:hover,
+        .delete-product-btn:hover {
+            opacity: 0.82;
+        }
+
+        /* =========================
+           FORMULARIO PRODUCTO
+        ========================== */
+
+        .product-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .product-form h2 {
+            margin: 0;
+        }
+
+        .product-form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .product-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .product-form-group label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .product-form-group input,
+        .product-form-group select,
+        .product-form-group textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px 12px;
+            border: 1px solid #d8d0c7;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 15px;
+            background: #fff;
+        }
+
+        .product-form-group textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .product-form-group input:focus,
+        .product-form-group select:focus,
+        .product-form-group textarea:focus {
+            outline: 2px solid #b8a48f;
+            outline-offset: 1px;
+        }
+
+        .product-form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .product-form-message {
+            padding: 10px 12px;
+            border-radius: 8px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .product-form-message.success {
+            display: block;
+            background: #e4f2e7;
+            color: #28643a;
+        }
+
+        .product-form-message.error {
+            display: block;
+            background: #f8e2e2;
+            color: #8b2e2e;
+        }
+
+        .admin-help {
+            margin: 0;
+            font-size: 14px;
+            color: #777;
+        }
+
+        @media (min-width: 700px) {
+            .product-form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .product-form-group.full-width {
+                grid-column: 1 / -1;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -289,6 +431,21 @@
             </div>
 
 
+            <!-- GESTIÓN DE PRODUCTOS -->
+
+            <div class="catalog-admin">
+
+                <button
+                    id="newProductButton"
+                    class="primary-btn"
+                    type="button"
+                >
+                    + Añadir producto
+                </button>
+
+            </div>
+
+
             <div class="catalog-toolbar">
 
                 <div class="search-box">
@@ -312,14 +469,6 @@
 
                         <option value="all">
                             Todas las categorías
-                        </option>
-
-                        <option value="1">
-                            Dulce
-                        </option>
-
-                        <option value="2">
-                            Salado
                         </option>
 
                     </select>
@@ -603,7 +752,7 @@
 
 
     <!-- =========================
-         MODAL PRODUCTO
+         MODAL CREAR / EDITAR PRODUCTO
     ========================== -->
 
     <div
@@ -621,7 +770,170 @@
                 ×
             </button>
 
-            <div id="productModalContent"></div>
+
+            <div class="product-form">
+
+                <span class="eyebrow">
+                    GESTIÓN DEL CATÁLOGO
+                </span>
+
+
+                <h2 id="productModalTitle">
+                    Añadir producto
+                </h2>
+
+
+                <p class="admin-help">
+                    Completa los datos del producto.
+                </p>
+
+
+                <form id="productForm">
+
+                    <div class="product-form-grid">
+
+                        <div class="product-form-group full-width">
+
+                            <label for="productName">
+                                Nombre
+                            </label>
+
+                            <input
+                                type="text"
+                                id="productName"
+                                required
+                                minlength="2"
+                                maxlength="100"
+                            >
+
+                        </div>
+
+
+                        <div class="product-form-group full-width">
+
+                            <label for="productDescription">
+                                Descripción
+                            </label>
+
+                            <textarea
+                                id="productDescription"
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="product-form-group">
+
+                            <label for="productPrice">
+                                Precio (€)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="productPrice"
+                                min="0.01"
+                                step="0.01"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="product-form-group">
+
+                            <label for="productStock">
+                                Stock
+                            </label>
+
+                            <input
+                                type="number"
+                                id="productStock"
+                                min="0"
+                                step="1"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="product-form-group">
+
+                            <label for="productUnit">
+                                Unidad
+                            </label>
+
+                            <input
+                                type="text"
+                                id="productUnit"
+                                placeholder="kg, unidad, litro..."
+                                required
+                                maxlength="30"
+                            >
+
+                        </div>
+
+
+                        <div class="product-form-group">
+
+                            <label for="productCategory">
+                                Categoría
+                            </label>
+
+                            <select
+                                id="productCategory"
+                                required
+                            ></select>
+
+                        </div>
+
+
+                        <div class="product-form-group full-width">
+
+                            <label for="productImage">
+                                Imagen (opcional)
+                            </label>
+
+                            <input
+                                type="text"
+                                id="productImage"
+                                placeholder="URL o ruta de imagen"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="productFormMessage"
+                        class="product-form-message"
+                    ></div>
+
+
+                    <div class="product-form-actions">
+
+                        <button
+                            id="cancelProductButton"
+                            class="secondary-btn"
+                            type="button"
+                        >
+                            Cancelar
+                        </button>
+
+
+                        <button
+                            id="saveProductButton"
+                            class="primary-btn"
+                            type="submit"
+                        >
+                            Guardar producto
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
 
         </div>
 
@@ -683,6 +995,15 @@
 
     </div>
 
+
+    <!-- AXIOS -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
+    ></script>
+
+
+    <!-- APP -->
 
     <script src="js/app.js"></script>
 

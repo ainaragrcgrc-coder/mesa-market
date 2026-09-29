@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from .database import engine, Base
 from . import models
@@ -31,6 +34,20 @@ app.add_middleware(
 # =========================
 
 Base.metadata.create_all(bind=engine)
+
+
+# =========================
+# ARCHIVOS ESTÁTICOS
+# =========================
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+FRONTEND_DIR = BASE_DIR / "frontend"
+
+app.mount(
+    "/assets",
+    StaticFiles(directory=FRONTEND_DIR / "assets"),
+    name="assets",
+)
 
 
 # =========================

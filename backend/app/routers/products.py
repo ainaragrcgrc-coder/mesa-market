@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Product, Category
+from ..models import Product, Category, RecipeProduct
 from ..schemas import ProductCreate, ProductResponse
 
 
@@ -122,7 +122,10 @@ def update_product(
     return product
 
 
-@router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{product_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
 def delete_product(
     product_id: int,
     db: Session = Depends(get_db)
@@ -137,6 +140,22 @@ def delete_product(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Producto no encontrado"
+        )
+
+    # Comprobar si el producto está relacionado con alguna receta
+    relation = (
+        db.query(RecipeProduct)
+        .filter(RecipeProduct.product_id == product_id)
+        .first()
+    )
+
+    if relation:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "No se puede eliminar el producto porque "
+                "está relacionado con una o varias recetas"
+            )
         )
 
     db.delete(product)
