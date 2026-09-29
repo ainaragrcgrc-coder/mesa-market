@@ -1,4 +1,28 @@
+# VS Code
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
 backend/.venv/
-backend/__pycache__/
-backend/*.pyc
+
+# Database
 backend/mesa_market.db
+
+# Environment variables
+.env
+backend/.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing / cache
+.pytest_cache/
+.mypy_cache/
+
+# Logs
+*.log

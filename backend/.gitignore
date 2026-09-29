@@ -1,4 +1,10 @@
-.venv/
+# Python cache
 __pycache__/
 *.pyc
-mesa_market.db
+*.pyo
+
+# Environment variables
+.env
+
+# Logs
+*.log
