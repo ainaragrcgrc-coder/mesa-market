@@ -4,9 +4,7 @@ from .models import Product
 
 IMAGES = {
     "Vainilla": "assets/products/vainilla.jpg",
-
     "Azúcar": "assets/products/azucar.jpg",
-
     "Levadura": "assets/products/levadura.jpg",
 }
 
@@ -24,14 +22,21 @@ try:
 
         if product:
             product.image = image_path
-            print(f"Imagen actualizada: {product_name} -> {image_path}")
+            print(
+                f"Imagen actualizada: "
+                f"{product_name} -> {image_path}"
+            )
         else:
-            print(f"No encontrado: {product_name}")
+            print(
+                f"No encontrado: {product_name}"
+            )
 
     db.commit()
 
     print()
-    print("Imágenes locales actualizadas correctamente.")
+    print(
+        "Imágenes locales actualizadas correctamente."
+    )
 
 finally:
     db.close()

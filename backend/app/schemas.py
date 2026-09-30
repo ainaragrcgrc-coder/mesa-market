@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 # =========================
@@ -108,8 +108,18 @@ class RecipeBase(BaseModel):
 
 class RecipeCreate(RecipeBase):
     product_ids: list[int] = Field(
-        default_factory=list
+        min_length=1
     )
+
+    @field_validator("product_ids")
+    @classmethod
+    def validate_product_ids(cls, value):
+        if len(value) != len(set(value)):
+            raise ValueError(
+                "No se pueden repetir productos en una receta"
+            )
+
+        return value
 
 
 class RecipeResponse(RecipeBase):

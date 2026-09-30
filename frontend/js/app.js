@@ -25,7 +25,7 @@ const $ = id => document.getElementById(id);
 const categoriesContainer =
     $("categoriesContainer");
 
-const productsContainer =
+
     $("productsContainer");
 
 const recipesContainer =
@@ -39,6 +39,9 @@ const categoryFilter =
 
 const sortFilter =
     $("sortFilter");
+
+const productsContainer =
+    $("productsContainer");
 
 const productCount =
     $("productCount");
@@ -858,6 +861,10 @@ function renderProducts() {
             String(list.length);
     }
 
+console.log(
+    "PRODUCTOS DESPUÉS DE FILTROS:",
+    list.length
+);
 
     if (!list.length) {
 

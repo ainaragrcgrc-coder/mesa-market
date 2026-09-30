@@ -7,7 +7,7 @@ def seed_data():
     db = SessionLocal()
 
     # =====================================================
-    # CATEGORÍAS
+    # CATEGORIES
     # =====================================================
 
     categories = [
@@ -50,9 +50,8 @@ def seed_data():
         .first()
     )
 
-
     # =====================================================
-    # PRODUCTOS
+    # PRODUCTS
     # =====================================================
 
     products = [
@@ -180,7 +179,6 @@ def seed_data():
             "image": "https://images.unsplash.com/photo-1605196560541-1d4a3c5f0a0d?auto=format&fit=crop&w=900&q=80",
             "category_id": dulce.id
         },
-
 
         # -------------------------
         # SALADO
@@ -327,9 +325,8 @@ def seed_data():
         }
     ]
 
-
     # =====================================================
-    # GUARDAR PRODUCTOS
+    # SAVE PRODUCTS
     # =====================================================
 
     for product_data in products:
@@ -359,9 +356,8 @@ def seed_data():
 
     db.commit()
 
-
     # =====================================================
-    # RECETAS
+    # RECIPES
     # =====================================================
 
     recipes = [
@@ -386,7 +382,7 @@ def seed_data():
             "description": "Tortitas esponjosas perfectas para el desayuno.",
             "instructions": (
                 "Batir los huevos con el azúcar. "
-                "Añadir la harina, la leche y la vainilla. "
+                "Añadir la harina y la vainilla. "
                 "Mezclar hasta conseguir una masa homogénea. "
                 "Cocinar pequeñas porciones en una sartén "
                 "hasta que estén doradas por ambos lados."
@@ -507,9 +503,8 @@ def seed_data():
         }
     ]
 
-
     # =====================================================
-    # GUARDAR RECETAS
+    # SAVE RECIPES
     # =====================================================
 
     for recipe_data in recipes:
@@ -538,9 +533,8 @@ def seed_data():
 
     db.commit()
 
-
     # =====================================================
-    # BUSCAR PRODUCTOS
+    # GET PRODUCTS
     # =====================================================
 
     product_map = {}
@@ -550,9 +544,8 @@ def seed_data():
     for product in all_products:
         product_map[product.name] = product
 
-
     # =====================================================
-    # BUSCAR RECETAS
+    # GET RECIPES
     # =====================================================
 
     recipe_map = {}
@@ -562,9 +555,8 @@ def seed_data():
     for recipe in all_recipes:
         recipe_map[recipe.name] = recipe
 
-
     # =====================================================
-    # RELACIONES RECETA - PRODUCTO
+    # RECIPE - PRODUCT RELATIONS
     # =====================================================
 
     relations = [
@@ -636,7 +628,6 @@ def seed_data():
         ("Patatas al horno", "Ajo", "1 cabeza")
     ]
 
-
     for recipe_name, product_name, quantity in relations:
 
         recipe = recipe_map.get(recipe_name)
@@ -662,7 +653,6 @@ def seed_data():
                         quantity=quantity
                     )
                 )
-
 
     db.commit()
     db.close()

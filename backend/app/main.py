@@ -11,7 +11,10 @@ from .routers import categories, products, recipes
 
 app = FastAPI(
     title="MESA MARKET API",
-    description="API REST para un supermercado online de ingredientes y recetas.",
+    description=(
+        "API REST para un supermercado online "
+        "de ingredientes y recetas."
+    ),
     version="1.0.0",
 )
 
@@ -30,14 +33,14 @@ app.add_middleware(
 
 
 # =========================
-# CREAR BASE DE DATOS
+# CREATE DATABASE TABLES
 # =========================
 
 Base.metadata.create_all(bind=engine)
 
 
 # =========================
-# ARCHIVOS ESTÁTICOS
+# STATIC FILES
 # =========================
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -45,7 +48,9 @@ FRONTEND_DIR = BASE_DIR / "frontend"
 
 app.mount(
     "/assets",
-    StaticFiles(directory=FRONTEND_DIR / "assets"),
+    StaticFiles(
+        directory=FRONTEND_DIR / "assets"
+    ),
     name="assets",
 )
 
@@ -60,7 +65,7 @@ app.include_router(recipes.router)
 
 
 # =========================
-# RUTA PRINCIPAL
+# ROOT ROUTE
 # =========================
 
 @app.get("/")

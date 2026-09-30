@@ -12,12 +12,32 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=list[CategoryResponse])
-def get_categories(db: Session = Depends(get_db)):
-    return db.query(Category).all()
+# =========================
+# GET ALL CATEGORIES
+# =========================
+
+@router.get(
+    "/",
+    response_model=list[CategoryResponse]
+)
+def get_categories(
+    db: Session = Depends(get_db)
+):
+    return (
+        db.query(Category)
+        .order_by(Category.id)
+        .all()
+    )
 
 
-@router.get("/{category_id}", response_model=CategoryResponse)
+# =========================
+# GET CATEGORY BY ID
+# =========================
+
+@router.get(
+    "/{category_id}",
+    response_model=CategoryResponse
+)
 def get_category(
     category_id: int,
     db: Session = Depends(get_db)
@@ -37,6 +57,10 @@ def get_category(
     return category
 
 
+# =========================
+# CREATE CATEGORY
+# =========================
+
 @router.post(
     "/",
     response_model=CategoryResponse,
@@ -48,7 +72,9 @@ def create_category(
 ):
     existing_category = (
         db.query(Category)
-        .filter(Category.name == category_data.name)
+        .filter(
+            Category.name == category_data.name
+        )
         .first()
     )
 
@@ -59,8 +85,7 @@ def create_category(
         )
 
     category = Category(
-        name=category_data.name,
-        description=category_data.description
+        **category_data.model_dump()
     )
 
     db.add(category)
@@ -70,7 +95,14 @@ def create_category(
     return category
 
 
-@router.put("/{category_id}", response_model=CategoryResponse)
+# =========================
+# UPDATE CATEGORY
+# =========================
+
+@router.put(
+    "/{category_id}",
+    response_model=CategoryResponse
+)
 def update_category(
     category_id: int,
     category_data: CategoryCreate,
@@ -100,7 +132,7 @@ def update_category(
     if existing_category:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Ya existe otra categoría con ese nombre"
+            detail="La categoría ya existe"
         )
 
     category.name = category_data.name
@@ -111,6 +143,10 @@ def update_category(
 
     return category
 
+
+# =========================
+# DELETE CATEGORY
+# =========================
 
 @router.delete(
     "/{category_id}",
@@ -134,14 +170,19 @@ def delete_category(
 
     products = (
         db.query(Product)
-        .filter(Product.category_id == category_id)
+        .filter(
+            Product.category_id == category_id
+        )
         .first()
     )
 
     if products:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="No se puede eliminar la categoría porque tiene productos asociados"
+            detail=(
+                "No se puede eliminar la categoría "
+                "porque tiene productos asociados"
+            )
         )
 
     db.delete(category)

@@ -17,7 +17,7 @@ router = APIRouter(
 
 
 # =========================
-# CONVERTIR RECETA A RESPUESTA
+# CONVERT RECIPE TO RESPONSE
 # =========================
 
 def recipe_to_response(recipe, db):
@@ -63,7 +63,7 @@ def recipe_to_response(recipe, db):
 
 
 # =========================
-# OBTENER TODAS LAS RECETAS
+# GET ALL RECIPES
 # =========================
 
 @router.get(
@@ -73,7 +73,11 @@ def recipe_to_response(recipe, db):
 def get_recipes(
     db: Session = Depends(get_db)
 ):
-    recipes = db.query(Recipe).all()
+    recipes = (
+        db.query(Recipe)
+        .order_by(Recipe.id)
+        .all()
+    )
 
     return [
         recipe_to_response(recipe, db)
@@ -82,7 +86,7 @@ def get_recipes(
 
 
 # =========================
-# CREAR RECETA
+# CREATE RECIPE
 # =========================
 
 @router.post(
@@ -125,7 +129,6 @@ def create_recipe(
     db.flush()
 
     for product in products:
-
         relation = RecipeProduct(
             recipe_id=recipe.id,
             product_id=product.id,
@@ -141,7 +144,7 @@ def create_recipe(
 
 
 # =========================
-# RECETAS POR PRODUCTO
+# GET RECIPES BY PRODUCT
 # =========================
 
 @router.get(
@@ -171,7 +174,7 @@ def get_recipes_by_product(
 
 
 # =========================
-# OBTENER RECETA POR ID
+# GET RECIPE BY ID
 # =========================
 
 @router.get(
@@ -198,7 +201,7 @@ def get_recipe(
 
 
 # =========================
-# ACTUALIZAR RECETA
+# UPDATE RECIPE
 # =========================
 
 @router.put(
@@ -249,10 +252,11 @@ def update_recipe(
 
     db.query(RecipeProduct).filter(
         RecipeProduct.recipe_id == recipe.id
-    ).delete()
+    ).delete(
+        synchronize_session=False
+    )
 
     for product in products:
-
         relation = RecipeProduct(
             recipe_id=recipe.id,
             product_id=product.id,
@@ -268,7 +272,7 @@ def update_recipe(
 
 
 # =========================
-# ELIMINAR RECETA
+# DELETE RECIPE
 # =========================
 
 @router.delete(
@@ -293,7 +297,9 @@ def delete_recipe(
 
     db.query(RecipeProduct).filter(
         RecipeProduct.recipe_id == recipe.id
-    ).delete()
+    ).delete(
+        synchronize_session=False
+    )
 
     db.delete(recipe)
     db.commit()
@@ -302,7 +308,7 @@ def delete_recipe(
 
 
 # =========================
-# SUGERENCIAS DE RECETAS
+# RECIPE SUGGESTIONS
 # =========================
 
 @router.post(
@@ -317,12 +323,14 @@ def suggest_recipes(
 
     existing_product_ids = {
         product.id
-        for product in db.query(Product).filter(
-            Product.id.in_(selected_products)
-        ).all()
+        for product in db.query(Product)
+        .filter(Product.id.in_(selected_products))
+        .all()
     }
 
-    missing_product_ids = selected_products - existing_product_ids
+    missing_product_ids = (
+        selected_products - existing_product_ids
+    )
 
     if missing_product_ids:
         missing_id = sorted(missing_product_ids)[0]
@@ -332,7 +340,11 @@ def suggest_recipes(
             detail=f"El producto {missing_id} no existe"
         )
 
-    recipes = db.query(Recipe).all()
+    recipes = (
+        db.query(Recipe)
+        .order_by(Recipe.id)
+        .all()
+    )
 
     suggestions = []
 

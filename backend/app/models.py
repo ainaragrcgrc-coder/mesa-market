@@ -5,7 +5,7 @@ from .database import Base
 
 
 # =========================
-# CATEGORÍAS
+# CATEGORIES
 # =========================
 
 class Category(Base):
@@ -28,9 +28,14 @@ class Category(Base):
         nullable=True
     )
 
+    products = relationship(
+        "Product",
+        back_populates="category"
+    )
+
 
 # =========================
-# PRODUCTOS
+# PRODUCTS
 # =========================
 
 class Product(Base):
@@ -78,6 +83,11 @@ class Product(Base):
         nullable=False
     )
 
+    category = relationship(
+        "Category",
+        back_populates="products"
+    )
+
     recipes = relationship(
         "Recipe",
         secondary="recipe_products",
@@ -86,7 +96,7 @@ class Product(Base):
 
 
 # =========================
-# RECETAS
+# RECIPES
 # =========================
 
 class Recipe(Base):
@@ -136,11 +146,14 @@ class Recipe(Base):
 
     @property
     def product_ids(self):
-        return [product.id for product in self.products]
+        return [
+            product.id
+            for product in self.products
+        ]
 
 
 # =========================
-# RELACIÓN RECETA - PRODUCTO
+# RECIPE - PRODUCT RELATION
 # =========================
 
 class RecipeProduct(Base):

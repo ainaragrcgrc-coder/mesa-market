@@ -12,7 +12,14 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=list[ProductResponse])
+# =========================
+# GET ALL PRODUCTS
+# =========================
+
+@router.get(
+    "/",
+    response_model=list[ProductResponse]
+)
 def get_products(
     page: int = Query(1, ge=1),
     limit: int = Query(12, ge=1, le=100),
@@ -23,17 +30,35 @@ def get_products(
     query = db.query(Product)
 
     if search:
-        query = query.filter(Product.name.ilike(f"%{search}%"))
+        query = query.filter(
+            Product.name.ilike(f"%{search}%")
+        )
 
     if category_id:
-        query = query.filter(Product.category_id == category_id)
+        query = query.filter(
+            Product.category_id == category_id
+        )
+
+    query = query.order_by(Product.id)
 
     offset = (page - 1) * limit
 
-    return query.offset(offset).limit(limit).all()
+    return (
+        query
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
 
-@router.get("/{product_id}", response_model=ProductResponse)
+# =========================
+# GET PRODUCT BY ID
+# =========================
+
+@router.get(
+    "/{product_id}",
+    response_model=ProductResponse
+)
 def get_product(
     product_id: int,
     db: Session = Depends(get_db)
@@ -52,6 +77,10 @@ def get_product(
 
     return product
 
+
+# =========================
+# CREATE PRODUCT
+# =========================
 
 @router.post(
     "/",
@@ -74,7 +103,9 @@ def create_product(
             detail="La categoría indicada no existe"
         )
 
-    product = Product(**product_data.model_dump())
+    product = Product(
+        **product_data.model_dump()
+    )
 
     db.add(product)
     db.commit()
@@ -83,7 +114,14 @@ def create_product(
     return product
 
 
-@router.put("/{product_id}", response_model=ProductResponse)
+# =========================
+# UPDATE PRODUCT
+# =========================
+
+@router.put(
+    "/{product_id}",
+    response_model=ProductResponse
+)
 def update_product(
     product_id: int,
     product_data: ProductCreate,
@@ -122,6 +160,10 @@ def update_product(
     return product
 
 
+# =========================
+# DELETE PRODUCT
+# =========================
+
 @router.delete(
     "/{product_id}",
     status_code=status.HTTP_204_NO_CONTENT
@@ -142,10 +184,12 @@ def delete_product(
             detail="Producto no encontrado"
         )
 
-    # Comprobar si el producto está relacionado con alguna receta
+    # Check if the product is related to any recipe
     relation = (
         db.query(RecipeProduct)
-        .filter(RecipeProduct.product_id == product_id)
+        .filter(
+            RecipeProduct.product_id == product_id
+        )
         .first()
     )
 
